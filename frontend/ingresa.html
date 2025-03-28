@@ -3,44 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title>Iniciar Sesión</title>
+  <link rel="stylesheet" href="styles.css">
   <style>
     body {
-      font-family: Arial, sans-serif;
       background: #f4f4f4;
-      padding: 20px;
     }
 
     h1 {
       text-align: center;
-    }
-
-    form {
-      max-width: 400px;
-      background: white;
-      padding: 20px;
-      margin: auto;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    input {
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 10px;
-      font-size: 16px;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      background: #007bff;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #0056b3;
     }
 
     p {
@@ -49,24 +19,42 @@
   </style>
 </head>
 <body>
-
-  <h1>Iniciar Sesión</h1>
-
-  <form id="loginForm">
-    <input type="email" name="email" placeholder="Correo electrónico" required>
-    <input type="password" name="password" placeholder="Contraseña" required>
-    <button type="submit">Ingresar</button>
-  </form>
-
-  <p style="text-align:center; margin-top:10px;"><a href="olvide.html">¿Olvidaste tu contraseña?</a></p>
-  <p>¿Aún no tienes cuenta? <a href="unete.html">Registrate</a></p>
-
-  <script>
-    const API = window.location.hostname.includes("localhost")
+  <header class="header">
+    <div class="container-m head">
+        <a  href="/frontend/index.html"><img src="/frontend/img/logo.PNG"></a>
+        <nav class="nav">
+            <ul class="nav-bar">
+                <li><a href="/frontend/quienes-somos.html">Nosotros</a></li>
+                <li><a href="/frontend/servicios.html">Servicios</a></li>
+                <li><a href="/frontend/contacto.html">Contacto</a></li>
+                <li class="log-in"><a href="/frontend/ingresa.html">Ingresa</a></li>
+                <li class="join-us"><a href="/frontend/unete.html">Únete</a></li>
+            </ul>
+        </nav>
+    </div>
+  </header>
+  <main>
+    <div class="login-header">
+      <h1>Iniciar Sesión</h1>
+    </div>
+    
+    <form id="loginForm" class="form">
+      <input class="login-input" type="email" name="email" placeholder="Correo electrónico" required>
+      <input class="login-input" type="password" name="password" placeholder="Contraseña" required>
+      <button class="login-button" type="submit">Ingresar</button>
+    </form>
+    <div class="join">
+      <p style="text-align:center; margin-top:10px;"><a href="olvide.html">¿Olvidaste tu contraseña?</a></p>
+      <p>¿Aún no tienes cuenta? <a href="unete.html">Registrate</a></p>
+    </div>
+  </main>
+    
+    <script>
+      const API = window.location.hostname.includes("localhost")
       ? "http://localhost:3000"
       : "https://api.miapp.com";
-
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      
+      document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
       const formData = new FormData(e.target);

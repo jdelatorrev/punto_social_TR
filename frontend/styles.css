@@ -649,3 +649,42 @@ a{
 .steps-text span{
   color: red;
 }
+
+/* Login */
+.login-header{
+  padding: 5rem 0;
+}
+
+.form{
+  max-width: 40rem;
+  background: white;
+  padding: 20px;
+  margin: auto;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.login-input{
+  width: 90%;
+  margin-bottom: 10px;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.login-button{
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  background: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+.login-button:hover{
+  background: #0056b3;
+}
+.join a{
+  color: #000;
+}
+.join a:hover{
+  color: #007bff;
+}
