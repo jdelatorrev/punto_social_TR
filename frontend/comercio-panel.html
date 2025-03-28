@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel del Comercio</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+
+    header {
+      background: #28a745;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    header span {
+      font-style: italic;
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #28a745;
+      color: white;
+    }
+
+    button.usar {
+      background-color: #dc3545;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      cursor: pointer;
+    }
+
+    button.usar:hover {
+      background-color: #c82333;
+    }
+
+    #cerrar {
+      margin: 30px auto;
+      display: block;
+      background: #333;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Panel del Comercio</h1>
+    <span id="usuarioNombre"></span>
+  </header>
+
+  <h2>Cupones Vendidos</h2>
+  <table id="cuponesTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Cliente</th>
+        <th>Descuento</th>
+        <th>Usado</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <button id="cerrar" onclick="cerrarSesion()">Cerrar sesión</button>
+
+  <script>
+    const API = window.location.hostname.includes("localhost")
+      ? "http://localhost:3000"
+      : "https://api.miapp.com";
+    let cuponesGlobal = [];
+
+    function verificarTokenValido() {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href = "comercio-login.html";
+        return null;
+      }
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const ahora = Math.floor(Date.now() / 1000);
+        if (payload.exp < ahora) {
+          alert("Tu sesión ha expirado.");
+          localStorage.removeItem("token");
+          window.location.href = "comercio-login.html";
+          return null;
+        }
+        return payload;
+      } catch (err) {
+        alert("Token inválido.");
+        localStorage.removeItem("token");
+        window.location.href = "comercio-login.html";
+        return null;
+      }
+    }
+
+    async function cargarCuponesVendidos() {
+      const payload = verificarTokenValido();
+      if (!payload || payload.tipo !== "comercio") {
+        alert("Acceso denegado");
+        return;
+      }
+      document.getElementById("usuarioNombre").textContent = payload.nombre;
+
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API}/api/cupones-vendidos`, {
+        headers: { Authorization: "Bearer " + token }
+      });
+
+      const data = await res.json();
+      cuponesGlobal = data;
+      renderCupones();
+    }
+
+    function renderCupones() {
+      const tbody = document.querySelector("#cuponesTable tbody");
+      tbody.innerHTML = "";
+
+      if (cuponesGlobal.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='6' style='text-align:center'>No hay cupones vendidos aún.</td></tr>";
+        return;
+      }
+
+      cuponesGlobal.forEach(c => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${c.id}</td>
+          <td>${c.titulo}</td>
+          <td>${c.cliente}</td>
+          <td>${c.descuento}</td>
+          <td>${c.utilizado ? '✅' : '❌'}</td>
+          <td>
+            ${!c.utilizado
+              ? `<button class="usar" onclick="marcarComoUsado(${c.id})">Marcar como usado</button>`
+              : ''
+            }
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function marcarComoUsado(id) {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API}/api/marcar-cupon-usado/${id}`, {
+        method: "POST",
+        headers: { Authorization: "Bearer " + token }
+      });
+      const result = await res.json();
+      if (res.ok) {
+        alert("✅ Cupón marcado como usado");
+        cargarCuponesVendidos();
+      } else {
+        alert(result.error || "Error al actualizar");
+      }
+    }
+
+    function cerrarSesion() {
+      localStorage.removeItem("token");
+      window.location.href = "ingresa.html";
+    }
+
+    // Inactividad de 3 minutos
+    let inactividadTimer;
+    function resetInactividad() {
+      clearTimeout(inactividadTimer);
+      inactividadTimer = setTimeout(() => {
+        alert("Sesión cerrada por inactividad.");
+        localStorage.removeItem("token");
+        window.location.href = "comercio-login.html";
+      }, 180000);
+    }
+    ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(evt => {
+      document.addEventListener(evt, resetInactividad);
+    });
+    resetInactividad();
+
+    cargarCuponesVendidos();
+  </script>
+</body>
+</html>

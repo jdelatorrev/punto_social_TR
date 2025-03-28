@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Login Comercio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Acceso para Comercios</h1>
+
+  <form id="loginForm">
+    <input type="email" name="email" placeholder="Correo del comercio" required><br>
+    <input type="password" name="password" placeholder="Contraseña" required><br>
+    <button type="submit">Ingresar</button>
+  </form>
+
+  <script>
+    const API = window.location.hostname.includes("localhost")
+      ? "http://localhost:3000"
+      : "https://api.miapp.com";
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+
+      const res = await fetch(`${API}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        const decoded = JSON.parse(atob(result.token.split('.')[1]));
+
+        if (decoded.tipo !== "comercio") {
+          alert("Este acceso es solo para comercios.");
+          return;
+        }
+
+        localStorage.setItem("token", result.token);
+        alert("Bienvenido al panel del comercio");
+        window.location.href = "comercio-panel.html";
+      } else {
+        alert(result.error || "Error al iniciar sesión");
+      }
+    });
+  </script>
+</body>
+</html>

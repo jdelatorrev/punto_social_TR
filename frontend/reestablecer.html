@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Restablecer contraseña</title>
+  <style>
+    body { font-family: Arial; background: #f4f4f4; padding: 20px; }
+    form {
+      max-width: 400px; margin: auto; padding: 20px;
+      background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    input, button {
+      width: 100%; margin-bottom: 10px; padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      background: #28a745; color: white; border: none;
+    }
+    button:hover { background: #218838; }
+    .mensaje {
+      padding: 10px;
+      background: #d4edda;
+      color: #155724;
+      margin-bottom: 10px;
+      display: none;
+    }
+    .mensaje.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center">Establecer nueva contraseña</h2>
+
+  <div id="mensaje" class="mensaje"></div>
+
+  <form id="resetForm">
+    <input type="password" name="password" placeholder="Nueva contraseña" required />
+    <button type="submit">Restablecer contraseña</button>
+  </form>
+
+  <script>
+    const API = window.location.hostname.includes("localhost")
+      ? "http://localhost:3000"
+      : "https://api.miapp.com";
+    const form = document.getElementById("resetForm");
+    const mensajeBox = document.getElementById("mensaje");
+
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+
+    if (!token) {
+      mensajeBox.textContent = "Token no válido.";
+      mensajeBox.className = "mensaje error";
+      mensajeBox.style.display = "block";
+      form.style.display = "none";
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      mensajeBox.style.display = "none";
+
+      const password = form.password.value;
+
+      try {
+        const res = await fetch(`${API}/api/reestablecer-password/${token}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password })
+        });
+
+        const data = await res.json();
+
+        mensajeBox.textContent = data.message || data.error || "Error desconocido";
+        mensajeBox.className = "mensaje " + (res.ok ? "" : "error");
+        mensajeBox.style.display = "block";
+
+        if (res.ok) {
+          form.style.display = "none";
+          setTimeout(() => {
+            window.location.href = "ingresa.html";
+          }, 3000);
+        }
+      } catch (err) {
+        mensajeBox.textContent = "Error de conexión con el servidor.";
+        mensajeBox.className = "mensaje error";
+        mensajeBox.style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>

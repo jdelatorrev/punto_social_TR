@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Iniciar Sesión</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    form {
+      max-width: 400px;
+      background: white;
+      padding: 20px;
+      margin: auto;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    input {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    p {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Iniciar Sesión</h1>
+
+  <form id="loginForm">
+    <input type="email" name="email" placeholder="Correo electrónico" required>
+    <input type="password" name="password" placeholder="Contraseña" required>
+    <button type="submit">Ingresar</button>
+  </form>
+
+  <p style="text-align:center; margin-top:10px;"><a href="olvide.html">¿Olvidaste tu contraseña?</a></p>
+  <p>¿Aún no tienes cuenta? <a href="unete.html">Registrate</a></p>
+
+  <script>
+    const API = window.location.hostname.includes("localhost")
+      ? "http://localhost:3000"
+      : "https://api.miapp.com";
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const res = await fetch(`${API}/api/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          localStorage.setItem("token", result.token);
+
+          // Decodificar el token para saber el tipo de usuario
+          const decoded = JSON.parse(atob(result.token.split('.')[1]));
+          const tipo = decoded.tipo;
+
+          if (tipo === "cliente") {
+            window.location.href = "cliente-panel.html";
+          } else if (tipo === "comercio") {
+            window.location.href = "comercio-panel.html";
+          } else if (tipo === "admin") {
+            window.location.href = "admin-panel.html";
+          } else {
+            alert("Tipo de usuario desconocido");
+          }
+        } else {
+          alert(result.error || "Credenciales incorrectas");
+        }
+      } catch (err) {
+        console.error("Error de red:", err);
+        alert("Error inesperado al iniciar sesión.");
+      }
+    });
+
+    // Supongamos que esta función se ejecuta después de login exitoso
+    function redirigirPostLogin() {
+      const grupoPendiente = localStorage.getItem("grupoPendiente");
+      if (grupoPendiente) {
+        localStorage.removeItem("grupoPendiente");
+        window.location.href = `comprar.html?grupo=${grupoPendiente}`;
+      } else {
+        window.location.href = "cliente-panel.html";
+      }
+    }
+
+    function redirigirPostLogin() {
+      const grupoPendiente = localStorage.getItem("grupoPendiente");
+      if (grupoPendiente) {
+        localStorage.removeItem("grupoPendiente");
+        // Redirige para comprar el grupo directamente
+        window.location.href = `comprar.html?grupo=${grupoPendiente}`;
+      } else {
+        // Si no hay grupo pendiente, va al panel
+        window.location.href = "cliente-panel.html";
+      }
+    }
+  </script>
+</body>
+</html>

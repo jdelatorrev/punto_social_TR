@@ -1,0 +1,859 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Panel del Administrador</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: Arial; background: #f4f4f4; padding: 20px; }
+    header {
+      background: #343a40; color: white; padding: 10px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    header h1 { margin: 0; font-size: 22px; }
+    header span { font-style: italic; font-size: 14px; }
+    section {
+      background: white; padding: 15px; margin: 20px auto; max-width: 960px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 6px solid #007bff;
+    }
+    table {
+      width: 100%; border-collapse: collapse; margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ddd; padding: 8px; text-align: left;
+    }
+    th { background-color: #007bff; color: white; }
+    .botones { margin-bottom: 10px; }
+    .botones button {
+      margin-right: 10px; padding: 8px 16px;
+      background: #28a745; border: none; color: white; cursor: pointer;
+    }
+    .botones button:hover { background: #218838; }
+    #cerrar {
+      display: block; margin: 30px auto; padding: 10px 20px;
+      background: #333; color: white; border: none; cursor: pointer;
+    }
+    .habilitar-btn {
+      padding: 4px 8px;
+      background: #ffc107;
+      color: black;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      margin-left: 5px;
+    }
+    .edit-input {
+      width: 95%;
+      padding: 3px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Panel del Administrador</h1>
+    <span id="usuarioNombre"></span>
+  </header>
+
+  <section>
+    <h2>Reporte de Cupones Vendidos</h2>
+    <div class="botones">
+      <button onclick="exportarExcel()">📥 Exportar a Excel</button>
+    </div>
+    <div class="filtros" style="margin-bottom: 15px;">
+      <label>
+        Estado:
+        <select id="filtroEstado" onchange="filtrarCupones()">
+          <option value="todos">Todos</option>
+          <option value="usados">Usados</option>
+          <option value="no_usados">No usados</option>
+        </select>
+      </label>
+      <label style="margin-left: 20px;">
+        Comercio:
+        <select id="filtroComercio" onchange="filtrarCupones()">
+          <option value="todos">Todos</option>
+        </select>
+      </label>
+    </div>
+    <div style="margin-bottom: 15px;">
+      <label>
+        Buscar:
+        <input type="text" id="busqueda" placeholder="Cliente o cupón..." oninput="filtrarCupones()" />
+      </label>
+    </div>
+    <table id="tabla-reporte">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Cupón</th>
+          <th>Comercio</th>
+          <th>Descuento</th>
+          <th>Usado</th>
+          <th>Fecha de compra</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+  <section style="margin-top: 40px;">
+    <h2>Grupos de Cupones</h2>
+    <form id="formCrearGrupo" onsubmit="crearGrupo(event)" style="margin-bottom: 20px;">
+      <label>Nombre del grupo: <input type="text" id="grupo_nombre" required /></label><br><br>
+      <label>Descripción: <input type="text" id="grupo_descripcion" /></label><br><br>
+      <label>Precio: <input type="number" step="0.01" id="grupo_precio" required /></label><br><br>
+      <button type="submit">Crear Grupo</button>
+    </form>
+  
+    <h3>Grupos Existentes</h3>
+    <table id="tabla-grupos-admin">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Descripción</th>
+          <th>Precio</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    
+  </section>
+  <section style="margin-top: 40px;">
+    <h2>Creación de Cupones</h2>
+    <form id="formCrearCupon" onsubmit="crearCupon(event)" style="margin-bottom: 20px;">
+      <label>Título: <input type="text" id="titulo" required></label><br><br>
+      <label>Descripción: <input type="text" id="descripcion" required></label><br><br>
+      <label>Descuento: <input type="text" id="descuento" min="0" required></label><br><br>
+      <label>Fecha de expiración: <input type="date" id="fecha_expiracion" required></label><br><br>
+      <label>Comercio:<select id="comercioSelect" required></select></label><br><br>
+      <label>Grupo:<select id="grupoSelect" required><option value="">-- Selecciona un grupo --</option></select></label><br><br>
+      <button type="submit">Crear cupón</button>
+    </form>
+
+    <h3>Cupones Existentes</h3>
+    <table id="tabla-cupones-admin">
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Descripción</th>
+          <th>Descuento</th>
+          <th>Expira</th>
+          <th>Comercio</th>
+          <th>Grupo</th>
+          <th>Descripción del Grupo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+  <div id="contenedor-cupones-por-grupo"></div>
+
+  <button id="cerrar" onclick="cerrarSesion()">Cerrar sesión</button>
+
+  <script>
+    const API = window.location.hostname.includes("localhost")
+    ? "http://localhost:3000"
+    : "https://api.miapp.com";
+    const token = localStorage.getItem("token");
+    let datosReporte = [];
+    let listaComercios = [];
+
+
+    function cerrarSesion() {
+      localStorage.removeItem("token");
+      window.location.href = "ingresa.html";
+    }
+
+    function verificarTokenValido() {
+      if (!token) window.location.href = "ingresa.html";
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp < Math.floor(Date.now() / 1000)) {
+          alert("Sesión expirada");
+          localStorage.removeItem("token");
+          window.location.href = "ingresa.html";
+        }
+        document.getElementById("usuarioNombre").textContent = payload.nombre;
+        return payload;
+      } catch (err) {
+        localStorage.removeItem("token");
+        window.location.href = "ingresa.html";
+      }
+    }
+
+    async function cargarComercios() {
+      const res = await fetch(`${API}/api/admin/usuarios`, {
+        headers: { Authorization: "Bearer " + token }
+      });
+      const usuarios = await res.json();
+      listaComercios = usuarios.filter(u => u.tipo === "comercio"); // ⬅️ Guardamos
+
+      const select = document.getElementById("comercioSelect");
+      select.innerHTML = "";
+      listaComercios.forEach(c => {
+        const option = document.createElement("option");
+        option.value = c.id;
+        option.textContent = c.nombre;
+        select.appendChild(option);
+      });
+    }
+
+    async function crearCupon(e) {
+      e.preventDefault();
+
+      const grupo_id = document.getElementById("grupoSelect").value;
+        if (!grupo_id) {
+          alert("Por favor selecciona un grupo para el cupón.");
+          return;
+        }
+
+      const datos = {
+        titulo: document.getElementById("titulo").value,
+        descripcion: document.getElementById("descripcion").value,
+        descuento: document.getElementById("descuento").value,
+        fecha_expiracion: document.getElementById("fecha_expiracion").value,
+        comercio_id: document.getElementById("comercioSelect").value,
+        grupo_id: document.getElementById("grupoSelect").value
+      };
+
+      try {
+        const res = await fetch(`${API}/api/admin/crear-cupon`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          },
+          body: JSON.stringify(datos)
+        });
+
+        const contentType = res.headers.get("content-type");
+        const respuestaCruda = await res.text();
+        console.log("📦 Respuesta cruda del backend:", respuestaCruda);
+
+        if (!contentType || !contentType.includes("application/json")) {
+          alert("⚠️ Error inesperado del servidor:\n" + respuestaCruda);
+          return;
+        }
+
+        const data = JSON.parse(respuestaCruda);
+
+        if (res.ok) {
+          alert("✅ Cupón creado correctamente");
+          document.getElementById("formCrearCupon").reset();
+          cargarCuponesAdmin();
+        } else {
+          alert("❌ " + (data.error || "Error al crear cupón"));
+        }
+
+      } catch (err) {
+        console.error("⛔ Error de conexión o parseo:", err);
+        alert("Error de conexión o respuesta inválida.");
+      }
+    }
+
+
+    function cargarCuponesAdmin() {
+      fetch(`${API}/api/admin/cupones`, {
+        headers: { Authorization: "Bearer " + token }
+      })
+        .then(res => res.json())
+        .then(cupones => {
+          const tbody = document.querySelector("#tabla-cupones-admin tbody");
+          tbody.innerHTML = "";
+          cupones.forEach(c => {
+            const tr = document.createElement("tr");
+            tr.setAttribute("data-id", c.id);
+            tr.innerHTML = `
+              <td><span>${c.titulo}</span><input type="text" class="edit-input" style="display:none" value="${c.titulo}" /></td>
+              <td><span>${c.descripcion || ''}</span><input type="text" class="edit-input" style="display:none" value="${c.descripcion || ''}" /></td>
+              <td><span>${c.descuento}</span><input type="text" class="edit-input" style="display:none" value="${c.descuento}" /></td>
+              <td><span>${new Date(c.fecha_expiracion).toLocaleDateString()}</span><input type="date" class="edit-input" style="display:none" value="${c.fecha_expiracion.split('T')[0]}" /></td>
+              <td>
+                <span>${c.comercio}</span>
+                <select class="edit-input" style="display:none">
+                  ${listaComercios.map(com => `
+                    <option value="${com.id}" ${com.nombre === c.comercio ? "selected" : ""}>${com.nombre}</option>
+                  `).join("")}
+                </select>
+              </td>
+              <td>
+                <span>${c.grupo}</span>
+                <select class="edit-input grupo-edit" style="display:none">
+                  ${listaGrupos.map(g => `
+                    <option value="${g.id}" ${g.id === c.grupo_id ? 'selected' : ''}>${g.nombre}</option>
+                  `).join("")}
+                </select>
+              </td>
+              <td>
+                <span>${c.grupo_descripcion || ''}</span>
+                <input type="text" class="edit-input grupo-descripcion-edit" style="display:none" value="${c.grupo_descripcion || ''}" />
+              </td>
+              <td>
+                <button onclick="habilitarEdicion(${c.id})">✏️ Editar</button>
+                <button class="guardar-btn" style="display:none" onclick="guardarEdicion(${c.id})">💾 Guardar</button>
+                <button class="cancelar-btn" style="display:none" onclick="cancelarEdicion(${c.id})">❌ Cancelar</button>
+                <button onclick="eliminarCupon(${c.id})">🗑 Eliminar</button>
+              </td>
+            `;
+
+            tbody.appendChild(tr);
+          });
+        });
+    }
+
+    function habilitarEdicion(id) {
+      const row = document.querySelector(`tr[data-id='${id}']`);
+      row.querySelectorAll("span").forEach(el => el.style.display = "none");
+      row.querySelectorAll(".edit-input").forEach(el => el.style.display = "inline-block");
+      row.querySelector(".guardar-btn").style.display = "inline-block";
+      row.querySelector(".cancelar-btn").style.display = "inline-block";
+    }
+
+    function cancelarEdicion(id) {
+      const row = document.querySelector(`tr[data-id='${id}']`);
+      row.querySelectorAll("span").forEach(el => el.style.display = "inline");
+      row.querySelectorAll(".edit-input").forEach(el => el.style.display = "none");
+      row.querySelector(".guardar-btn").style.display = "none";
+      row.querySelector(".cancelar-btn").style.display = "none";
+    }
+
+    function guardarEdicion(id) {
+      const row = document.querySelector(`tr[data-id='${id}']`);
+      const inputs = row.querySelectorAll(".edit-input");
+
+      const titulo = inputs[0].value.trim();
+      const descripcion = inputs[1].value.trim();
+      const descuento = inputs[2].value.trim();
+      const fecha_expiracion = inputs[3].value;
+      const comercio_id = inputs[4].value;
+      const grupo_id = row.querySelector(".grupo-edit").value;
+      const grupo_descripcion = row.querySelector(".grupo-descripcion-edit").value;
+
+      if (!titulo || !descripcion || !descuento || !fecha_expiracion || !comercio_id || !grupo_id) {
+        alert("Todos los campos son obligatorios.");
+        return;
+      }
+
+      const datos = {
+        titulo,
+        descripcion,
+        descuento,
+        fecha_expiracion,
+        comercio_id,
+        grupo_id
+      };
+
+      fetch(`${API}/api/admin/cupones/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        },
+        body: JSON.stringify(datos)
+      })
+        .then(res => res.json())
+        .then(async data => {
+          if (data.message) {
+            // ✅ Si el cupón se actualizó, actualiza también la descripción del grupo
+            if (grupo_descripcion.trim() !== "") {
+              await fetch(`${API}/api/admin/grupos/${grupo_id}`, {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: "Bearer " + token
+                },
+                body: JSON.stringify({ descripcion: grupo_descripcion })
+              });
+            }
+
+            alert("✅ Cupón actualizado correctamente");
+            cargarCuponesAdmin();
+          } else {
+            alert("❌ " + (data.error || "Error al actualizar"));
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert("⛔ Error de conexión");
+        });
+    }
+
+
+
+
+    function cargarFiltroComercios(data) {
+      const select = document.getElementById("filtroComercio");
+      const comerciosUnicos = [...new Set(data.map(row => row.comercio))];
+      comerciosUnicos.forEach(comercio => {
+        const option = document.createElement("option");
+        option.value = comercio;
+        option.textContent = comercio;
+        select.appendChild(option);
+      });
+    }
+
+    function renderTabla(data) {
+      const tbody = document.querySelector("#tabla-reporte tbody");
+      tbody.innerHTML = "";
+      data.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.cliente}</td>
+          <td>${row.cupon}</td>
+          <td>${row.comercio}</td>
+          <td>${row.descuento}</td>
+          <td>${row.utilizado  ? `✅ <button class="habilitar-btn" onclick="habilitarCupon(${row.id})">Habilitar</button>`  : `❌ <button class="habilitar-btn" onclick="marcarUtilizado(${row.id})">Marcar como utilizado</button>`}</td>
+          <td>${new Date(row.fecha_compra).toLocaleDateString()}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function habilitarCupon(id) {
+      if (!confirm("¿Habilitar nuevamente este cupón como disponible?")) return;
+
+      try {
+        const res = await fetch(`${API}/api/admin/habilitar-cupon/${id}`, {
+          method: "POST",
+          headers: { Authorization: "Bearer " + token }
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          alert("✅ Cupón habilitado correctamente.");
+          cargarReporte(); // Recarga los datos del reporte
+        } else {
+          alert("⚠️ " + (data.error || "Error al habilitar cupón."));
+        }
+      } catch (err) {
+        alert("⛔ Error de conexión con el servidor.");
+        console.error(err);
+      }
+    }
+
+    async function marcarUtilizado(id) {
+      try {
+        const res = await fetch(`${API}/api/admin/marcar-utilizado/${id}`, {
+          method: "POST",
+          headers: { Authorization: "Bearer " + token }
+        });
+
+        const contentType = res.headers.get("content-type");
+        const textoPlano = await res.text();
+        console.log("📦 Respuesta cruda:", textoPlano);
+
+        if (!contentType || !contentType.includes("application/json")) {
+          alert("⚠️ Error inesperado del servidor:\n" + textoPlano);
+          return;
+        }
+
+        const data = JSON.parse(textoPlano);
+        if (res.ok) {
+          alert("✅ Cupón marcado como utilizado");
+          cargarReporte();
+        } else {
+          alert("⚠️ " + (data.error || "Error al marcar cupón"));
+        }
+
+      } catch (err) {
+        console.error("⛔ Error al marcar como utilizado:", err);
+        alert("⛔ Error al marcar como utilizado: " + err);
+      }
+    }
+
+    function filtrarCupones() {
+      const estado = document.getElementById("filtroEstado").value;
+      const comercioSeleccionado = document.getElementById("filtroComercio").value;
+      const textoBusqueda = document.getElementById("busqueda")?.value.toLowerCase() || "";
+
+      const filtrados = datosReporte.filter(row => {
+        const coincideEstado =
+          estado === "todos" ||
+          (estado === "usados" && row.utilizado) ||
+          (estado === "no_usados" && !row.utilizado);
+
+        const coincideComercio =
+          comercioSeleccionado === "todos" || row.comercio === comercioSeleccionado;
+
+        const coincideBusqueda =
+          row.cliente.toLowerCase().includes(textoBusqueda) ||
+          row.cupon.toLowerCase().includes(textoBusqueda);
+
+        return coincideEstado && coincideComercio && coincideBusqueda;
+      });
+
+      renderTabla(filtrados);
+    }
+
+    async function cargarReporte() {
+      try {
+        const res = await fetch(`${API}/api/admin/reporte-cupones`, {
+          headers: { Authorization: "Bearer " + token }
+        });
+
+        if (!res.ok) throw new Error("Error de servidor");
+
+        const data = await res.json();
+        datosReporte = data;
+        cargarFiltroComercios(data);
+        renderTabla(data);
+      } catch (error) {
+        console.error("Error al cargar el reporte:", error);
+        alert("Error al cargar los datos del servidor.");
+      }
+    }
+
+    function exportarExcel() {
+      if (!datosReporte.length) {
+        alert("No hay datos para exportar.");
+        return;
+      }
+
+      const dataExcel = datosReporte.map(row => ({
+        Cliente: row.cliente,
+        Cupón: row.cupon,
+        Comercio: row.comercio,
+        Descuento: row.descuento,
+        Usado: row.utilizado ? 'Sí' : 'No',
+        "Fecha de compra": new Date(row.fecha_compra).toLocaleDateString()
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(dataExcel);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Reporte Cupones");
+      XLSX.writeFile(workbook, "reporte-cupones.xlsx");
+    }
+
+    const payload = verificarTokenValido();
+    if (payload && payload.tipo === "admin") {
+      cargarComercios().then(() => {
+        cargarGrupos().then(() => {
+          cargarCuponesAdmin();
+          cargarReporte();
+        });
+      });
+    }
+
+    function editarCupon(id) {
+      const cupon = datosReporte.find(c => c.id === id) || {}; // fallback
+      const nuevoTitulo = prompt("Nuevo título:", cupon.titulo);
+      const nuevaDescripcion = prompt("Nueva descripción:", cupon.descripcion || "");
+      const nuevoDescuento = prompt("Nuevo descuento:", cupon.descuento);
+      const nuevaFecha = prompt("Nueva fecha (YYYY-MM-DD):", cupon.fecha_expiracion?.split("T")[0]);
+
+      if (!nuevoTitulo || !nuevaDescripcion || !nuevoDescuento || !nuevaFecha) {
+        return alert("Todos los campos son obligatorios.");
+      }
+
+      fetch(`${API}/api/admin/cupones/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        },
+        body: JSON.stringify({
+          titulo: nuevoTitulo,
+          descripcion: nuevaDescripcion,
+          descuento: nuevoDescuento,
+          fecha_expiracion: nuevaFecha
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.message) {
+            alert("✅ Cupón actualizado");
+            cargarCuponesAdmin();
+          } else {
+            alert("❌ " + (data.error || "Error al actualizar"));
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Error de conexión.");
+        });
+    }
+
+    function eliminarCupon(id) {
+      if (!confirm("¿Eliminar este cupón permanentemente?")) return;
+
+      fetch(`${API}/api/admin/cupones/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: "Bearer " + token
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.message) {
+            alert("🗑️ Cupón eliminado");
+            cargarCuponesAdmin();
+          } else {
+            alert("❌ " + (data.error || "Error al eliminar"));
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Error de conexión.");
+        });
+    }
+
+    let listaGrupos = [];
+
+  async function crearGrupo(e) {
+    e.preventDefault();
+
+    const nombre = document.getElementById("grupo_nombre").value.trim();
+    const descripcion = document.getElementById("grupo_descripcion").value.trim();
+    const precio = parseFloat(document.getElementById("grupo_precio").value);
+
+    if (!nombre || isNaN(precio)) return alert("Nombre y precio son obligatorios.");
+
+    try {
+      const res = await fetch(`${API}/api/admin/grupos`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        },
+        body: JSON.stringify({ nombre, descripcion, precio })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("✅ Grupo creado correctamente");
+        document.getElementById("formCrearGrupo").reset();
+        cargarGrupos();
+      } else {
+        alert(data.error || "Error al crear grupo");
+      }
+    } catch (err) {
+      console.error("Error al crear grupo:", err);
+      alert("Error de conexión");
+    }
+  }
+
+  async function cargarGrupos() {
+    try {
+      const res = await fetch(`${API}/api/admin/grupos`, {
+        headers: { Authorization: "Bearer " + token }
+      });
+
+      listaGrupos = await res.json();
+
+      const ul = document.getElementById("lista-grupos");
+      ul.innerHTML = "";
+      listaGrupos.forEach(grupo => {
+        const li = document.createElement("li");
+        li.textContent = `${grupo.nombre} - $${grupo.precio}`;
+        ul.appendChild(li);
+      });
+
+      // Rellenar el select de grupo
+      const select = document.getElementById("grupoSelect");
+      select.innerHTML = `<option value="">-- Sin grupo --</option>`;
+      listaGrupos.forEach(grupo => {
+        const opt = document.createElement("option");
+        opt.value = grupo.id;
+        opt.textContent = grupo.nombre;
+        select.appendChild(opt);
+      });
+
+    } catch (err) {
+      console.error("Error al cargar grupos:", err);
+    }
+  }
+
+  async function cargarGrupos() {
+    try {
+      const res = await fetch(`${API}/api/admin/grupos`, {
+        headers: { Authorization: "Bearer " + token }
+      });
+
+      listaGrupos = await res.json();
+
+      // Rellenar tabla
+      const tbody = document.querySelector("#tabla-grupos-admin tbody");
+      tbody.innerHTML = "";
+
+      listaGrupos.forEach(grupo => {
+        const tr = document.createElement("tr");
+        tr.setAttribute("data-id", grupo.id); // 👈 esto es lo que faltaba
+        tr.innerHTML = `
+          <td>${grupo.nombre}</td>
+          <td>
+            <span>${grupo.descripcion}</span>
+            <input type="text" class="edit-input" style="display:none" value="${grupo.descripcion || ''}" />
+          </td>
+          <td>
+            <span>$${parseFloat(grupo.precio).toFixed(2)}</span>
+            <input type="number" step="0.01" class="edit-input" style="display:none" value="${grupo.precio}" />
+          </td>
+          <td>
+            <button onclick="habilitarEdicionGrupo(${grupo.id})">✏️ Editar</button>
+            <button class="guardar-grupo-btn" style="display:none" onclick="guardarEdicionGrupo(${grupo.id})">💾 Guardar</button>
+            <button class="cancelar-grupo-btn" style="display:none" onclick="cancelarEdicionGrupo(${grupo.id})">❌ Cancelar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // También actualizar el <select> de creación de cupones
+      const grupoSelect = document.getElementById("grupoSelect");
+      grupoSelect.innerHTML = `<option value="">-- Selecciona un grupo --</option>`;
+      listaGrupos.forEach(g => {
+        const option = document.createElement("option");
+        option.value = g.id;
+        option.textContent = g.nombre;
+        grupoSelect.appendChild(option);
+      });
+
+    } catch (err) {
+      console.error("Error al cargar grupos:", err);
+      alert("Error al cargar grupos");
+    }
+  }
+
+  function habilitarEdicionGrupo(id) {
+  const row = document.querySelector(`#tabla-grupos-admin tr[data-id='${id}']`);
+  row.querySelectorAll("span").forEach(el => el.style.display = "none");
+  row.querySelectorAll(".edit-input").forEach(el => el.style.display = "inline-block");
+  row.querySelector(".guardar-grupo-btn").style.display = "inline-block";
+  row.querySelector(".cancelar-grupo-btn").style.display = "inline-block";
+}
+
+function cancelarEdicionGrupo(id) {
+    cargarGrupos(); // simplemente recarga
+  }
+
+  function guardarEdicionGrupo(id) {
+    const row = document.querySelector(`#tabla-grupos-admin tr[data-id='${id}']`);
+    const inputs = row.querySelectorAll(".edit-input");
+
+    const nuevaDescripcion = inputs[0].value.trim();
+    const nuevoPrecio = parseFloat(inputs[1].value);
+
+    if (!nuevaDescripcion || isNaN(nuevoPrecio)) {
+      alert("La descripción y precio son obligatorios.");
+      return;
+    }
+
+    fetch(`${API}/api/admin/grupos/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token
+      },
+      body: JSON.stringify({ descripcion: nuevaDescripcion, precio: nuevoPrecio })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.message) {
+          alert("✅ Grupo actualizado correctamente");
+          cargarGrupos();
+        } else {
+          alert(data.error || "Error al actualizar grupo");
+        }
+      })
+      .catch(err => {
+        console.error("Error al actualizar grupo:", err);
+        alert("⛔ Error de conexión");
+      });
+  }
+
+
+  async function cargarCuponesAgrupados() {
+    try {
+      const res = await fetch(`${API}/api/admin/cupones`, {
+        headers: { Authorization: "Bearer " + token }
+      });
+      const cupones = await res.json();
+
+      // Agrupar cupones por grupo
+      cuponesPorGrupo = {};
+      paginaActual = {};
+      cupones.forEach(c => {
+        if (!cuponesPorGrupo[c.grupo_id]) {
+          cuponesPorGrupo[c.grupo_id] = {
+            nombre: c.grupo,
+            cupones: []
+          };
+          paginaActual[c.grupo_id] = 1;
+        }
+        cuponesPorGrupo[c.grupo_id].cupones.push(c);
+      });
+
+      renderizarCuponesAgrupados();
+    } catch (err) {
+      console.error("Error al cargar cupones:", err);
+      alert("Error al cargar cupones agrupados");
+    }
+  }
+
+  function renderizarCuponesAgrupados() {
+    const contenedor = document.getElementById("contenedor-cupones-por-grupo");
+    contenedor.innerHTML = "";
+
+    Object.entries(cuponesPorGrupo).forEach(([grupoId, grupoData]) => {
+      const cupones = grupoData.cupones;
+      const totalPaginas = Math.ceil(cupones.length / 20);
+      const pagina = paginaActual[grupoId];
+      const inicio = (pagina - 1) * 20;
+      const fin = inicio + 20;
+      const cuponesPagina = cupones.slice(inicio, fin);
+
+      const tabla = `
+        <h3>${grupoData.nombre}</h3>
+        <table border="1" style="width: 100%; margin-bottom: 10px;">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Descripción</th>
+              <th>Descuento</th>
+              <th>Expira</th>
+              <th>Comercio</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${cuponesPagina.map(c => `
+              <tr>
+                <td>${c.titulo}</td>
+                <td>${c.descripcion}</td>
+                <td>${c.descuento}</td>
+                <td>${new Date(c.fecha_expiracion).toLocaleDateString()}</td>
+                <td>${c.comercio}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+        <div>
+          <button onclick="cambiarPagina(${grupoId}, -1)">⬅️</button>
+          Página <strong>${pagina}</strong> de <strong>${totalPaginas}</strong>
+          <button onclick="cambiarPagina(${grupoId}, 1)">➡️</button>
+        </div>
+        <hr />
+      `;
+
+      contenedor.innerHTML += tabla;
+    });
+  }
+
+  function cambiarPagina(grupoId, delta) {
+    const total = Math.ceil(cuponesPorGrupo[grupoId].cupones.length / 20);
+    paginaActual[grupoId] += delta;
+
+    if (paginaActual[grupoId] < 1) paginaActual[grupoId] = 1;
+    if (paginaActual[grupoId] > total) paginaActual[grupoId] = total;
+
+    renderizarCuponesAgrupados();
+  }
+
+  // Inicializar
+  cargarCuponesAgrupados();
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+# 🔒 Archivos sensibles y configuraciones
+.env
+.env.*           # Por si usas .env.local, .env.production, etc.
+*.log
+*.pem
+
+# 🗃️ Bases de datos locales o archivos temporales
+*.sqlite
+*.db
+*.bak
+*.sql
+
+# 🧹 Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 🚀 Archivos de despliegue
+.DS_Store
+.vscode/
+.idea/
+dist/
+build/
+netlify/
+out/
+coverage/
+
+# 📦 Archivos generados por dependencias
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# 🗃️ Backups y temporales
+*.swp
+*.tmp
+*.temp
+*.orig
+
+# 🧪 Test files (si los agregás)
+*.test.js
+*.spec.js
+
+# ⚙️ Configs opcionales
+*.local
+*.log.*
+*.sublime-project
+*.sublime-workspace
+
+# 🧾 Archivos de consola
+logs/
+*.log
+
+# 💻 Frontend build (si usás herramientas como Vite/React/Next)
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/build/
+
+# 🐘 MySQL dumps o backups (por seguridad)
+*.sql
+*.dump
