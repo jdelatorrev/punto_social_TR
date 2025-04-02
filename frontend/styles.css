@@ -441,23 +441,39 @@ a{
   }
 
   /* Mision */
+  .mision-heading{
+    text-align: center;
+  }
 @media (min-width: 768px){
   .mision_vision{
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: center;
-    gap: 20rem;
+    gap: 3rem;
+    text-align: center;
   }
 }
   .mision_vision_2 {
-    padding: 5rem 0;
+    background-color: #000;
+    border-radius: 3rem;
+    margin: 5rem 0;
+    padding-top: 5rem;
   }
-  .mision_vision_2 h3{
-    margin: 10rem 0 2rem 0;
+  .mision_vision h3{
     color: red;
   }
-  .mision_vision_2 p{
-    text-align: justify;
+  .mision_vision img{
+    background-color: #fff;
+    border-radius: 3rem;
+    padding: 3rem 20rem;
+    width: auto;
+    height: 10rem;
+  }
+  .mision{
+    background-color: #fff;
+    border-radius: 3rem;
+    padding: 3rem;
+    margin: 3rem;
   }
   .mision_vision .our_val{
     text-align: center;
