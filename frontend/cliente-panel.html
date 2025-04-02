@@ -59,7 +59,7 @@
 
   <div id="cupones-container"></div>
   <button id="cerrar" onclick="cerrarSesion()">Cerrar sesión</button>
-
+  <script src="js/api.js"></script>
   <script>
 
     function irAComprar() {
@@ -78,9 +78,6 @@
       }
 
     });
-    const API = window.location.hostname.includes("localhost")
-      ? "http://localhost:3000"
-      : "https://api.miapp.com";
     let cuponesGlobal = [];
 
     function verificarTokenValido() {

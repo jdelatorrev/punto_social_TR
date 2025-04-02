@@ -101,6 +101,7 @@ a{
     text-align: left;
     gap: 10rem;
     margin: 5rem 0;
+    /* height: 70vh; */
 }
 @media (min-width: 768px){
     .intro{
@@ -127,7 +128,15 @@ a{
     margin-bottom: 5rem;
 }
 .intro-logo{
+    display: flex;
+    justify-content: center;
     grid-column-start: 2;
+    grid-row-start: 1;
+    grid-row-end: 4;
+}
+.intro-logo img{
+  width: auto;
+  height: 60rem;
 }
 .intro-quote{
     grid-row-start: 2;
@@ -160,13 +169,16 @@ a{
 }
 .buy{
     grid-row-start: 3;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.buy img{
-    width: auto;
-    height: 8rem;
+    margin: 0 5rem;
+  }
+.buy p{
+  border: solid 3px #000;
+  border-radius: 40px;
+  color: red;
+  width: 100%;
+  padding: 2rem;
+  text-align: center;
+  font-size: 3rem;
 }
 
 /* Section 2 */
@@ -177,6 +189,7 @@ a{
     color: #fff;
 }
 .section-2 h1{
+  text-align: center;
     padding-top: 5rem;
     font-size: 4rem;
     color: #fff;
@@ -196,6 +209,7 @@ a{
 }
 .benefits-list-2{
     padding: 5rem 0;
+
 }
 .benefits-list-2 img{
     width: 4rem;
@@ -210,6 +224,12 @@ a{
 .benefits-list-2 p{
     font-weight: 300;
     font-size: 1.8rem;
+}
+.benefit{
+  border: solid 2px #fff;
+  padding: 3rem;
+  border-radius: 80px;
+  text-align: center;
 }
 
 /* Section 3 */
@@ -227,17 +247,23 @@ a{
 }
 .stats h3{
     padding-top: 10rem;
+    text-align: start;
 }
+
 .stats > div{
     padding: 3rem 5rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    /* align-items: center; */
+}
+.stats > div h2{
+  text-align: center;
 }
 .stats .sales{
     background-color: #000;
     border-radius: 25px;
     color: #fff;
+
 }
 .stats .sales p{
     color: #fff;
@@ -260,8 +286,10 @@ a{
     grid-row-start: 1;
  }
  .save-text{
-    padding-top: 20rem;
-    padding-left: 5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10rem 0 5rem 5rem;
  }
  .save-text h1{
     padding: 5rem 0;
@@ -274,7 +302,15 @@ a{
     color: red;
     padding: 10rem 0;
  }
-
+.save-text img{
+  width: 20rem;
+  height: auto;
+}
+.buynow{
+  display: flex;
+  justify-content: center;
+  padding-top: 15rem;
+}
   /* Section 5 */
 @media (min-width: 768px){
   .customers{

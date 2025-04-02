@@ -5,8 +5,27 @@ require('dotenv').config();
 const app = express();
 const pool = require('./db');
 
+// ✅ Lista blanca de orígenes permitidos
+const allowedOrigins = [
+  'http://localhost:5500',                   // Frontend local
+  'http://127.0.0.1:5500',                   // Otra forma del local
+  'http://localhost:3000',                   // Backend local
+  'https://miapp.netlify.app',               // Frontend en producción (Netlify)
+  'https://api.miapp.com'                    // Backend en producción (Render)
+];
+
+// 🛡 Middleware de CORS
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // permitir peticiones tipo Postman
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    console.warn("❌ CORS bloqueado para:", origin);
+    return callback(new Error('No autorizado por CORS'));
+  },
+  credentials: true
+}));
+
 // Middlewares
-app.use(cors());
 app.use(express.json());
 
 // Rutas
@@ -16,15 +35,13 @@ app.use('/api', require('./routes/comercio'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api', require('./routes/public'));
 
-
-
-// Ruta de prueba
+// Ruta de prueba de conexión a DB
 app.get('/api/test-db', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT NOW() AS ahora');
     res.json(rows[0]);
   } catch (err) {
-    console.error('Error al conectar con la DB:', err);
+    console.error('❌ Error al conectar con DB:', err);
     res.status(500).json({ error: 'Error en la conexión con la base de datos' });
   }
 });
