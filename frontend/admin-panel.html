@@ -152,11 +152,8 @@
   <div id="contenedor-cupones-por-grupo"></div>
 
   <button id="cerrar" onclick="cerrarSesion()">Cerrar sesión</button>
-
+  <script src="js/api.js"></script>
   <script>
-    const API = window.location.hostname.includes("localhost")
-    ? "http://localhost:3000"
-    : "https://api.miapp.com";
     const token = localStorage.getItem("token");
     let datosReporte = [];
     let listaComercios = [];

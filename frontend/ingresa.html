@@ -48,36 +48,31 @@
       <p>¿Aún no tienes cuenta? <a href="unete.html">Registrate</a></p>
     </div>
   </main>
-    
+    <script src="js/api.js"></script>
     <script>
-      const API = window.location.hostname.includes("localhost")
-      ? "http://localhost:3000"
-      : "https://api.miapp.com";
-      
       document.getElementById("loginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+        e.preventDefault();
 
-      const formData = new FormData(e.target);
-      const data = Object.fromEntries(formData.entries());
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
 
-      try {
-        const res = await fetch(`${API}/api/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
+        try {
+          const result = await apiFetch("/api/login", {
+            method: "POST",
+            body: JSON.stringify(data),
+            headers: {
+              "Content-Type": "application/json"
+            },
+            auth: false  // login no necesita token
+          });
 
-        const result = await res.json();
-
-        if (res.ok) {
           localStorage.setItem("token", result.token);
 
-          // Decodificar el token para saber el tipo de usuario
           const decoded = JSON.parse(atob(result.token.split('.')[1]));
           const tipo = decoded.tipo;
 
           if (tipo === "cliente") {
-            window.location.href = "cliente-panel.html";
+            redirigirPostLogin();
           } else if (tipo === "comercio") {
             window.location.href = "comercio-panel.html";
           } else if (tipo === "admin") {
@@ -85,37 +80,22 @@
           } else {
             alert("Tipo de usuario desconocido");
           }
-        } else {
-          alert(result.error || "Credenciales incorrectas");
+
+        } catch (err) {
+          console.error("⛔ Error:", err);
+          alert(err.message || "Credenciales incorrectas");
         }
-      } catch (err) {
-        console.error("Error de red:", err);
-        alert("Error inesperado al iniciar sesión.");
-      }
-    });
+      });
 
-    // Supongamos que esta función se ejecuta después de login exitoso
-    function redirigirPostLogin() {
-      const grupoPendiente = localStorage.getItem("grupoPendiente");
-      if (grupoPendiente) {
-        localStorage.removeItem("grupoPendiente");
-        window.location.href = `comprar.html?grupo=${grupoPendiente}`;
-      } else {
-        window.location.href = "cliente-panel.html";
+      function redirigirPostLogin() {
+        const grupoPendiente = localStorage.getItem("grupoPendiente");
+        if (grupoPendiente) {
+          localStorage.removeItem("grupoPendiente");
+          window.location.href = `comprar.html?grupo=${grupoPendiente}`;
+        } else {
+          window.location.href = "cliente-panel.html";
+        }
       }
-    }
-
-    function redirigirPostLogin() {
-      const grupoPendiente = localStorage.getItem("grupoPendiente");
-      if (grupoPendiente) {
-        localStorage.removeItem("grupoPendiente");
-        // Redirige para comprar el grupo directamente
-        window.location.href = `comprar.html?grupo=${grupoPendiente}`;
-      } else {
-        // Si no hay grupo pendiente, va al panel
-        window.location.href = "cliente-panel.html";
-      }
-    }
   </script>
 </body>
 </html>
