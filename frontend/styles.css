@@ -661,7 +661,10 @@ a{
   min-width: 30rem;
   padding: 5rem 0;
 }
-
+.mt h1{
+  color: red;
+  font-weight: 400;
+}
 /* Use */
 .white-text{
   color: #fff;
