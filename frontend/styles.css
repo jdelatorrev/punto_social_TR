@@ -99,7 +99,7 @@ a{
 }
 .intro{
     text-align: left;
-    gap: 10rem;
+    /* gap: 10rem; */
     margin: 5rem 0;
     /* height: 70vh; */
 }
@@ -141,6 +141,7 @@ a{
 }
 .intro-quote{
     grid-row-start: 2;
+    margin: 5rem 0;
 }
 .benefits{
     grid-template-columns: 1;
@@ -412,6 +413,10 @@ a{
 }
 .revista p{
   color: red;
+  font-weight: 500;
+  font-size: 1.8rem;
+  margin: 1rem;
+
 }
 .revista .end{
   text-align: right;
@@ -749,6 +754,7 @@ a{
 /* Login */
 .login-header{
   padding: 5rem 0;
+  text-align: center;
 }
 
 .form{

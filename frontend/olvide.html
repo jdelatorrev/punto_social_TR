@@ -2,9 +2,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Recuperar contraseña</title>
+  <title>Punto Social | Recuperar Contraseña</title>
+  <link rel="stylesheet" href="styles.css" />
   <style>
-    body { font-family: Arial; background: #f4f4f4; padding: 20px; }
     form {
       max-width: 400px; margin: auto; padding: 20px;
       background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -31,12 +31,44 @@
   </style>
 </head>
 <body>
-  <h2 style="text-align:center">Recuperar contraseña</h2>
-  <form id="olvideForm">
-    <div id="mensaje" class="mensaje"></div>
-    <input type="email" name="email" placeholder="Correo electrónico" required />
-    <button type="submit">Enviar enlace</button>
-  </form>
+  <header class="header">
+    <div class="container-m head">
+      <a href="/frontend/index.html"><img src="/frontend/img/logo.PNG" /></a>
+      <nav class="nav">
+        <ul class="nav-bar">
+          <li><a href="/frontend/quienes-somos.html">Nosotros</a></li>
+          <li><a href="/frontend/servicios.html">Servicios</a></li>
+          <li><a href="/frontend/categorias.html">Categorías</a></li>
+          <li><a href="/frontend/contacto.html">Contacto</a></li>
+          <li class="log-in"><a href="/frontend/ingresa.html">Ingresa</a></li>
+          <li class="join-us"><a href="/frontend/unete.html">Únete</a></li>
+      </ul>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="container-m">
+      <div class="intro">
+          <img class="logo" src="/frontend/img/logo_intro.png" alt="logo">
+          <div class="intro-quote">
+              <p>Descubre cupones exclusivos y únete a una comunidad conectada que maximiza tu ahorro gozando de un mundo de descuentos.</p>
+          </div>
+          <div class="login-header">
+            <h1>Recuperar Contraseña</h1>
+          </div>
+          <form id="olvideForm">
+            <div id="mensaje" class="mensaje"></div>
+            <input type="email" name="email" placeholder="Correo electrónico" required />
+            <button type="submit">Enviar enlace</button>
+            <div class="join">
+              <p>¿Aún no tienes cuenta? <a href="unete.html">Registrate</a></p>
+              <p style="text-align:center; margin-top:10px;">¿Ya tienes cuenta? <a href="ingresa.html">Inicia Sesión</a></p>
+            </div>
+          </form>
+      </div>
+    </section>
+  </main>
+
 
   <script>
     const API = window.location.hostname.includes("localhost")

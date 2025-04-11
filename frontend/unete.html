@@ -52,22 +52,34 @@
       </nav>
     </div>
   </header>
-
-  <div class="login-header">
-    <h1 style="text-align:center">Registro de Cliente</h1>
-    <form id="registroForm">
-      <div id="mensajeError" class="error" style="display: none;"></div>
-      <input type="text" name="nombre" placeholder="Tu nombre" required />
-      <input type="email" name="email" placeholder="Correo electrónico" required />
-      <input type="password" name="password" placeholder="Contraseña" required />
-      <input type="text" name="telefono" placeholder="Teléfono" required />
-      <select name="vendedor_id" required>
-        <option value="">Selecciona tu vendedor</option>
-      </select>
-      <button type="submit">Registrarme</button>
-    </form>
-  </div>
-
+  <main>
+    <section class="container-m">
+      <div class="intro">
+          <img class="logo" src="/frontend/img/logo_intro.png" alt="logo">
+          <div class="intro-quote">
+              <p>Descubre cupones exclusivos y únete a una comunidad conectada que maximiza tu ahorro gozando de un mundo de descuentos.</p>
+          </div>
+          <div class="login-header">
+            <h1>Registrate</h1>
+          </div>
+          <form id="registroForm">
+            <div id="mensajeError" class="error" style="display: none;"></div>
+            <input type="text" name="nombre" placeholder="Tu nombre" required />
+            <input type="email" name="email" placeholder="Correo electrónico" required />
+            <input type="password" name="password" placeholder="Contraseña" required />
+            <input type="text" name="telefono" placeholder="Teléfono" required />
+            <select name="vendedor_id" required>
+              <option value="">Selecciona tu vendedor</option>
+            </select>
+            <button type="submit">Registrarme</button>
+            <div class="join">
+              <p style="text-align:center; margin-top:10px;"><a href="olvide.html">¿Olvidaste tu contraseña?</a></p>
+              <p style="text-align:center; margin-top:10px;">¿Ya tienes cuenta? <a href="ingresa.html">Inicia Sesión</a></p>
+            </div>
+          </form>
+      </div>
+    </section>
+  </main>
   <script src="js/api.js"></script>
   <script>
     const form = document.getElementById("registroForm");
