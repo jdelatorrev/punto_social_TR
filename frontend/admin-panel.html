@@ -2,20 +2,22 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Panel del Administrador</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Punto Social | ADMIN</title>
+  <link rel="stylesheet" href="styles.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    body { font-family: Arial; background: #f4f4f4; padding: 20px; }
+    body { font-family: Arial; background: #f4f4f4;}
     header {
       background: #343a40; color: white; padding: 10px 20px;
       display: flex; justify-content: space-between; align-items: center;
     }
     header h1 { margin: 0; font-size: 22px; }
-    header span { font-style: italic; font-size: 14px; }
+    header span { font-size: 2rem; margin-right: 5rem; }
     section {
       background: white; padding: 15px; margin: 20px auto; max-width: 960px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 6px solid #007bff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 6px solid rgb(55, 55, 161);
     }
     table {
       width: 100%; border-collapse: collapse; margin-top: 10px;
@@ -23,7 +25,7 @@
     th, td {
       border: 1px solid #ddd; padding: 8px; text-align: left;
     }
-    th { background-color: #007bff; color: white; }
+    th { background-color: rgb(55, 55, 161); color: white; }
     .botones { margin-bottom: 10px; }
     .botones button {
       margin-right: 10px; padding: 8px 16px;
@@ -51,7 +53,10 @@
   </style>
 </head>
 <body>
-  <header>
+  <header class="header">
+    <div class="container-m head">
+        <a  href="/frontend/index.html"><img src="/frontend/img/logo.PNG"></a>
+    </div>
     <h1>Panel del Administrador</h1>
     <span id="usuarioNombre"></span>
   </header>
@@ -92,6 +97,49 @@
           <th>Descuento</th>
           <th>Usado</th>
           <th>Fecha de compra</th>
+          <th>Teléfono</th>
+          <th>Vendedor</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+  <section style="margin-top: 40px;">
+    <h2>Administración de Vendedores</h2>
+  
+    <form id="formCrearVendedor" onsubmit="crearVendedor(event)">
+      <label>Nombre: <input type="text" id="vendedor_nombre" required /></label><br><br>
+      <label>Email: <input type="email" id="vendedor_email" required /></label><br><br>
+      <label>Teléfono: <input type="text" id="vendedor_telefono" required /></label><br><br>
+      <button type="submit">Agregar Vendedor</button>
+    </form>
+  
+    <h3 style="margin-top: 30px;">Vendedores existentes</h3>
+    <table id="tabla-vendedores">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Teléfono</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+  <section style="margin-top: 40px;">
+    <h2>Clientes por Vendedor</h2>
+    <label for="vendedorSelector">Seleccioná un vendedor:</label>
+    <select id="vendedorSelector" onchange="verClientesDelVendedor()">
+      <option value="">-- Elegir --</option>
+    </select>
+    <table id="tabla-clientes-vendedor">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Teléfono</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -149,9 +197,10 @@
       <tbody></tbody>
     </table>
   </section>
-  <div id="contenedor-cupones-por-grupo"></div>
+  <div id="contenedor-cupones-por-grupo" class="cuponesadmin"></div>
 
   <button id="cerrar" onclick="cerrarSesion()">Cerrar sesión</button>
+
   <script src="js/api.js"></script>
   <script>
     const token = localStorage.getItem("token");
@@ -395,6 +444,7 @@
     function renderTabla(data) {
       const tbody = document.querySelector("#tabla-reporte tbody");
       tbody.innerHTML = "";
+
       data.forEach(row => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -402,12 +452,33 @@
           <td>${row.cupon}</td>
           <td>${row.comercio}</td>
           <td>${row.descuento}</td>
-          <td>${row.utilizado  ? `✅ <button class="habilitar-btn" onclick="habilitarCupon(${row.id})">Habilitar</button>`  : `❌ <button class="habilitar-btn" onclick="marcarUtilizado(${row.id})">Marcar como utilizado</button>`}</td>
+          <td>
+            ${row.utilizado 
+              ? `✅ <button class="habilitar-btn" onclick="habilitarCupon(${row.id})">Habilitar</button>` 
+              : `❌ <button class="habilitar-btn" onclick="marcarUtilizado(${row.id})">Marcar como usado</button>`}
+          </td>
           <td>${new Date(row.fecha_compra).toLocaleDateString()}</td>
+          <td>
+            <input type="text" value="${row.telefono || ''}" 
+              onchange="actualizarTelefonoCliente('${row.cliente}', '${row.telefono}', this.value)" />
+          </td>
+          <td>
+            <select onchange="asignarVendedorCliente('${row.cliente}', this.value)">
+              <option value="">-- Ninguno --</option>
+              ${vendedoresGlobal
+                .filter(v => v.activo) // 👈 solo activos
+                .map(v => `
+                  <option value="${v.id}" ${v.nombre === row.vendedor ? 'selected' : ''}>
+                    ${v.nombre}
+                  </option>
+                `).join('')}
+            </select>
+          </td>
         `;
         tbody.appendChild(tr);
       });
     }
+
 
     async function habilitarCupon(id) {
       if (!confirm("¿Habilitar nuevamente este cupón como disponible?")) return;
@@ -529,11 +600,36 @@
     if (payload && payload.tipo === "admin") {
       cargarComercios().then(() => {
         cargarGrupos().then(() => {
-          cargarCuponesAdmin();
-          cargarReporte();
+          cargarVendedoresGlobal().then(() => {
+            mostrarVendedoresTabla();
+            cargarCuponesAdmin();
+            cargarReporte();
+          });
         });
       });
     }
+    async function cargarReporte() {
+      if (!vendedoresGlobal.length) {
+        await cargarVendedoresAdmin(); // 👈 se asegura que esté cargado
+      }
+
+      try {
+        const res = await fetch(`${API}/api/admin/reporte-cupones`, {
+          headers: { Authorization: "Bearer " + token }
+        });
+
+        if (!res.ok) throw new Error("Error de servidor");
+
+        const data = await res.json();
+        datosReporte = data;
+        cargarFiltroComercios(data);
+        renderTabla(data);
+      } catch (error) {
+        console.error("Error al cargar el reporte:", error);
+        alert("Error al cargar los datos del servidor.");
+      }
+    }
+
 
     function editarCupon(id) {
       const cupon = datosReporte.find(c => c.id === id) || {}; // fallback
@@ -850,6 +946,236 @@ function cancelarEdicionGrupo(id) {
 
   // Inicializar
   cargarCuponesAgrupados();
+
+  async function cargarVendedoresAdmin() {
+  try {
+    const res = await fetch(`${API}/api/admin/vendedores`, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    const vendedores = await res.json();
+    const tbody = document.querySelector("#tabla-vendedores tbody");
+    tbody.innerHTML = "";
+
+    vendedores.forEach(v => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input type="text" value="${v.nombre}" onchange="actualizarCampoVendedor(${v.id}, 'nombre', this.value)" /></td>
+        <td><input type="email" value="${v.email}" onchange="actualizarCampoVendedor(${v.id}, 'email', this.value)" /></td>
+        <td><input type="text" value="${v.telefono || ''}" onchange="actualizarCampoVendedor(${v.id}, 'telefono', this.value)" /></td>
+        <td>${v.activo ? '✅ Activo' : '❌ Inactivo'}</td>
+        <td>
+          <button onclick="cambiarEstadoVendedor(${v.id}, ${v.activo ? 0 : 1})">
+            ${v.activo ? 'Desactivar' : 'Activar'}
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error("Error al cargar vendedores:", err);
+    alert("Error al cargar vendedores");
+  }
+}
+
+async function crearVendedor(e) {
+  e.preventDefault();
+  const nombre = document.getElementById("vendedor_nombre").value.trim();
+  const email = document.getElementById("vendedor_email").value.trim();
+  const telefono = document.getElementById("vendedor_telefono").value.trim();
+
+  try {
+    const res = await fetch(`${API}/api/admin/vendedores`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token
+      },
+      body: JSON.stringify({ nombre, email, telefono })
+    });
+
+    const contentType = res.headers.get("content-type");
+
+    // 🔍 Revisa que sea JSON válido antes de intentar leerlo
+    if (!contentType || !contentType.includes("application/json")) {
+      const textoPlano = await res.text();
+      throw new Error("Respuesta no válida del servidor:\n" + textoPlano);
+    }
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("✅ Vendedor agregado");
+      document.getElementById("formCrearVendedor").reset();
+      cargarVendedoresAdmin();
+    } else {
+      alert(data.error || "Error al crear vendedor");
+    }
+  } catch (err) {
+    console.error("Error al crear vendedor:", err);
+    alert("Error al crear vendedor: " + err.message);
+  }
+}
+
+
+async function cambiarEstadoVendedor(id, estado) {
+  try {
+    const res = await fetch(`${API}/api/admin/vendedores/${id}/estado`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token
+      },
+      body: JSON.stringify({ activo: estado })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert("✅ Estado actualizado");
+      cargarVendedoresAdmin();
+    } else {
+      alert(data.error || "Error al cambiar estado");
+    }
+  } catch (err) {
+    console.error("Error:", err);
+    alert("Error de conexión");
+  }
+}
+
+async function actualizarCampoVendedor(id, campo, valor) {
+  try {
+    const res = await fetch(`${API}/api/admin/vendedores/${id}/actualizar`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token
+      },
+      body: JSON.stringify({ campo, valor })
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      alert(data.error || "Error al actualizar");
+    }
+  } catch (err) {
+    console.error("Error al actualizar campo:", err);
+  }
+}
+
+async function verClientesDelVendedor() {
+  const vendedorId = document.getElementById("vendedorSelector").value;
+  if (!vendedorId) return;
+
+  const res = await fetch(`${API}/api/admin/vendedores/${vendedorId}/clientes`, {
+    headers: { Authorization: "Bearer " + token }
+  });
+
+  const clientes = await res.json();
+  const tbody = document.querySelector("#tabla-clientes-vendedor tbody");
+  tbody.innerHTML = "";
+
+  clientes.forEach(c => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${c.nombre}</td><td>${c.email}</td><td>${c.telefono}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+let vendedoresGlobal = [];
+
+async function cargarVendedoresGlobal() {
+  try {
+    const res = await fetch(`${API}/api/admin/vendedores`, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    vendedoresGlobal = await res.json();
+  } catch (err) {
+    console.error("Error al cargar vendedores (global):", err);
+  }
+}
+
+async function mostrarVendedoresTabla() {
+  try {
+    const res = await fetch(`${API}/api/admin/vendedores`, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    const vendedores = await res.json();
+    const tbody = document.querySelector("#tabla-vendedores tbody");
+    tbody.innerHTML = "";
+
+    vendedores.forEach(v => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input type="text" value="${v.nombre}" onchange="actualizarCampoVendedor(${v.id}, 'nombre', this.value)" /></td>
+        <td><input type="email" value="${v.email}" onchange="actualizarCampoVendedor(${v.id}, 'email', this.value)" /></td>
+        <td><input type="text" value="${v.telefono || ''}" onchange="actualizarCampoVendedor(${v.id}, 'telefono', this.value)" /></td>
+        <td>${v.activo ? '✅ Activo' : '❌ Inactivo'}</td>
+        <td>
+          <button onclick="cambiarEstadoVendedor(${v.id}, ${v.activo ? 0 : 1})">
+            ${v.activo ? 'Desactivar' : 'Activar'}
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error("Error al mostrar vendedores:", err);
+    alert("Error al mostrar vendedores");
+  }
+}
+
+async function asignarVendedorCliente(nombreCliente, vendedor_id) {
+  const cliente = datosReporte.find(c => c.cliente === nombreCliente);
+  if (!cliente) return;
+
+  try {
+    const res = await fetch(`${API}/api/admin/clientes/${cliente.id}/vendedor`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token
+      },
+      body: JSON.stringify({ vendedor_id })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert("✅ Vendedor asignado");
+      cargarReporte();
+    } else {
+      alert("❌ " + (data.error || "Error al asignar vendedor"));
+    }
+  } catch (err) {
+    console.error("Error al asignar vendedor:", err);
+  }
+}
+
+async function actualizarTelefonoCliente(nombreCliente, actual, nuevo) {
+  if (actual === nuevo) return;
+
+  const cliente = datosReporte.find(c => c.cliente === nombreCliente);
+  if (!cliente) return;
+
+  try {
+    const res = await fetch(`${API}/api/admin/clientes/${cliente.id}/telefono`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token
+      },
+      body: JSON.stringify({ telefono: nuevo })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert("📱 Teléfono actualizado");
+    } else {
+      alert(data.error || "Error al actualizar teléfono");
+    }
+  } catch (err) {
+    console.error("Error al actualizar teléfono:", err);
+  }
+}
+
 
   </script>
 </body>

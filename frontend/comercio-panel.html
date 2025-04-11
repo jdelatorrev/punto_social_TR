@@ -2,12 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Panel del Comercio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Punto Social | Comercio</title>
+  <link rel="stylesheet" href="styles.css">
   <style>
     body {
-      font-family: Arial, sans-serif;
       background: #f4f4f4;
-      padding: 20px;
     }
 
     header {
@@ -21,12 +21,12 @@
 
     header h1 {
       margin: 0;
-      font-size: 22px;
+      font-size: 2rem;
     }
 
     header span {
-      font-style: italic;
-      font-size: 14px;
+      font-size: 2rem;
+      margin-right: 5rem;
     }
 
     table {
@@ -44,7 +44,7 @@
     }
 
     th {
-      background-color: #28a745;
+      background-color: red;
       color: white;
     }
 
@@ -54,6 +54,9 @@
       padding: 5px 10px;
       border: none;
       cursor: pointer;
+    }
+    td{
+      font-size: 1.5rem;
     }
 
     button.usar:hover {
@@ -72,25 +75,29 @@
   </style>
 </head>
 <body>
-  <header>
+  <header class="header">
+    <div class="container-m head">
+        <a  href="/frontend/index.html"><img src="/frontend/img/logo.PNG"></a>
+    </div>
     <h1>Panel del Comercio</h1>
     <span id="usuarioNombre"></span>
   </header>
-
-  <h2>Cupones Vendidos</h2>
-  <table id="cuponesTable">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Título</th>
-        <th>Cliente</th>
-        <th>Descuento</th>
-        <th>Usado</th>
-        <th>Acción</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="container-m">
+    <h2>Cupones Vendidos</h2>
+    <table id="cuponesTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Título</th>
+          <th>Cliente</th>
+          <th>Descuento</th>
+          <th>Estatus</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
   <button id="cerrar" onclick="cerrarSesion()">Cerrar sesión</button>
   <script src="js/api.js"></script>
@@ -155,7 +162,7 @@
           <td>${c.titulo}</td>
           <td>${c.cliente}</td>
           <td>${c.descuento}</td>
-          <td>${c.utilizado ? '✅' : '❌'}</td>
+          <td>${c.utilizado ? '❌' : '✅'}</td>
           <td>
             ${!c.utilizado
               ? `<button class="usar" onclick="marcarComoUsado(${c.id})">Marcar como usado</button>`

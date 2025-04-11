@@ -107,10 +107,11 @@ a{
     .intro{
         display: grid;
         grid-template-columns: 1fr 1fr;
+        align-items:center ;
     }
-    .intro .logo{
+    /* .intro .logo{
         margin-bottom: 20rem;
-    }
+    } */
     .intro h1{
         padding: 0 10rem;
     }
@@ -124,9 +125,9 @@ a{
 .intro p{
     font-weight: 600;
 }
-.intro .logo{
+/* .intro .logo{
     margin-bottom: 5rem;
-}
+} */
 .intro-logo{
     display: flex;
     justify-content: center;
@@ -230,6 +231,7 @@ a{
   padding: 3rem;
   border-radius: 80px;
   text-align: center;
+  margin-top: 2rem;
 }
 
 /* Section 3 */
@@ -392,7 +394,7 @@ a{
     padding: 8rem 0;
   }
   .we-photo img{
-    width: 50rem;
+    max-width: 100%;
     height: auto;
     object-fit: cover;
     border-top: 35px solid rgb(220, 220, 220);
@@ -405,12 +407,19 @@ a{
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10rem;
+    align-items: center;
   }
+}
+.revista p{
+  color: red;
+}
+.revista .end{
+  text-align: right;
 }
   .history img{
     max-width: 100%;
-    height: 100%;
-    object-fit: cover;
+    /* height: 100%;
+    object-fit: cover; */
   }
   .history-text{
     padding: 5rem 0;
@@ -568,9 +577,11 @@ a{
 }
 
 /* Servicios */
-.division{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+@media (min-width: 768px){
+  .division{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
 }
 .text{
   padding: 5rem 0;
@@ -603,10 +614,15 @@ a{
   color: #fff;
   padding: 5rem 0;
 }
-.categories-list{
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-  gap: 5rem;
+@media (min-width: 768px){
+  .categories-list{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    gap: 5rem;
+  }
+}
+.categories-list li{
+  margin-top: 2rem;
 }
 .categories-list ul{
   margin: 0;
@@ -660,6 +676,7 @@ a{
 }
 .all h3{
   margin: 0;
+  color: #000;
 }
 
 /* Strategy */
@@ -699,12 +716,14 @@ a{
   margin: 2rem 0;
   color: #fff;
 }
-.steps{
-  margin: 10rem 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  column-gap: 20rem;
+@media (min-width: 768px){
+  .steps{
+    margin: 10rem 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    column-gap: 20rem;
+  }
 }
 .step{
   display: flex;
@@ -765,3 +784,112 @@ a{
 .join a:hover{
   color: #007bff;
 }
+
+/* Comprar */
+.saludo{
+  text-align: right;
+  color: #fff;
+  
+}
+/* Cupones Cliente */
+header span{
+  font-size: 2rem;
+  margin-right: 5rem;
+}
+#cupones-container p{
+  margin: 2rem 0;
+}
+
+/* Cupones Admin */
+.cuponesadmin{
+  margin: 20px auto;
+  max-width: 960px;
+}
+
+/* Resutaurantes */
+.restaurantes h1{
+  color: #fff;
+  padding-top: 5rem;
+}
+@media (min-width: 768px){
+  .restaurantes-list{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+  }
+}
+.restaurante img{
+  max-width: 100%;
+}
+.restaurante, .restaurante p{
+  color: #fff;
+  padding: 2rem 0;
+}
+.galeria-restaurante{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+
+}
+.galeria-restaurante img{
+  object-fit: cover;
+  max-width: 100%;
+  height: 100%;
+}
+/* .galeria {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
+} */
+
+.galeria img {
+  cursor: pointer;
+  border-radius: 5px;
+  transition: transform 0.2s;
+}
+.galeria img:hover {
+  transform: scale(1.01);
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  padding-top: 60px;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.9);
+  text-align: center;
+}
+
+.modal-contenido {
+  max-width: 90%;
+  max-height: 80vh;
+  margin: auto;
+  display: block;
+  border-radius: 10px;
+}
+
+.cerrar {
+  position: absolute;
+  top: 30px;
+  right: 50px;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+}
+
+.flecha {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  font-size: 50px;
+  color: white;
+  padding: 10px;
+  user-select: none;
+  transform: translateY(-50%);
+}
+.izquierda { left: 20px; }
+.derecha { right: 20px; }

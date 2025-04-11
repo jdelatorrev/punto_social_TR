@@ -5,10 +5,6 @@
   <title>Iniciar Sesión</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    body {
-      background: #f4f4f4;
-    }
-
     h1 {
       text-align: center;
     }
@@ -23,30 +19,39 @@
     <div class="container-m head">
         <a  href="/frontend/index.html"><img src="/frontend/img/logo.PNG"></a>
         <nav class="nav">
-            <ul class="nav-bar">
-                <li><a href="/frontend/quienes-somos.html">Nosotros</a></li>
-                <li><a href="/frontend/servicios.html">Servicios</a></li>
-                <li><a href="/frontend/contacto.html">Contacto</a></li>
-                <li class="log-in"><a href="/frontend/ingresa.html">Ingresa</a></li>
-                <li class="join-us"><a href="/frontend/unete.html">Únete</a></li>
-            </ul>
+          <ul class="nav-bar">
+            <li><a href="/frontend/quienes-somos.html">Nosotros</a></li>
+            <li><a href="/frontend/servicios.html">Servicios</a></li>
+            <li><a href="/frontend/categorias.html">Categorías</a></li>
+            <li><a href="/frontend/contacto.html">Contacto</a></li>
+            <li class="log-in"><a href="/frontend/ingresa.html">Ingresa</a></li>
+            <li class="join-us"><a href="/frontend/unete.html">Únete</a></li>
+        </ul>
         </nav>
     </div>
   </header>
   <main>
-    <div class="login-header">
-      <h1>Iniciar Sesión</h1>
-    </div>
+    <section class="container-m">
+      <div class="intro">
+          <img class="logo" src="/frontend/img/logo_intro.png" alt="logo">
+          <div class="intro-quote">
+              <p>Descubre cupones exclusivos y únete a una comunidad conectada que maximiza tu ahorro gozando de un mundo de descuentos.</p>
+          </div>
+          <div class="login-header">
+            <h1>Iniciar Sesión</h1>
+          </div>
+          <form id="loginForm" class="form">
+            <input class="login-input" type="email" name="email" placeholder="Correo electrónico" required>
+            <input class="login-input" type="password" name="password" placeholder="Contraseña" required>
+            <button class="login-button" type="submit">Ingresar</button>
+            <div class="join">
+              <p style="text-align:center; margin-top:10px;"><a href="olvide.html">¿Olvidaste tu contraseña?</a></p>
+              <p>¿Aún no tienes cuenta? <a href="unete.html">Registrate</a></p>
+            </div>
+          </form>
+      </div>
+  </section>
     
-    <form id="loginForm" class="form">
-      <input class="login-input" type="email" name="email" placeholder="Correo electrónico" required>
-      <input class="login-input" type="password" name="password" placeholder="Contraseña" required>
-      <button class="login-button" type="submit">Ingresar</button>
-    </form>
-    <div class="join">
-      <p style="text-align:center; margin-top:10px;"><a href="olvide.html">¿Olvidaste tu contraseña?</a></p>
-      <p>¿Aún no tienes cuenta? <a href="unete.html">Registrate</a></p>
-    </div>
   </main>
     <script src="js/api.js"></script>
     <script>

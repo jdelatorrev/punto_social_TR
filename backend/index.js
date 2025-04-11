@@ -14,6 +14,21 @@ const allowedOrigins = [
   'https://api.miapp.com'                    // Backend en producción (Render)
 ];
 
+// Ruta pública para obtener vendedores activos
+app.get("/api/vendedores-activos", async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT id, nombre, email
+      FROM vendedores
+      WHERE activo = 1
+    `);
+    res.json(rows);
+  } catch (err) {
+    console.error("Error al obtener vendedores activos:", err);
+    res.status(500).json({ error: "Error al obtener vendedores" });
+  }
+});
+
 // 🛡 Middleware de CORS
 app.use(cors({
   origin: (origin, callback) => {
@@ -50,3 +65,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Servidor corriendo en puerto ${PORT}`);
 });
+

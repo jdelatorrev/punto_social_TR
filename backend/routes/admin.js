@@ -161,19 +161,22 @@ router.post('/habilitar-cupon/:id', verificarToken, soloAdmin, async (req, res) 
 router.get('/reporte-cupones', verificarToken, soloAdmin, async (req, res) => {
   try {
     const [reporte] = await pool.query(`
-      SELECT 
-        cupones_usuarios.id,
-        cupones.titulo AS cupon,
-        cupones.descripcion,
-        cupones.descuento,
-        cupones_usuarios.utilizado,
-        cupones_usuarios.fecha_compra,
-        usuarios.nombre AS cliente,
-        comercios.nombre AS comercio
-      FROM cupones_usuarios
-      JOIN cupones ON cupones_usuarios.cupon_id = cupones.id
-      JOIN usuarios ON cupones_usuarios.usuario_id = usuarios.id
-      JOIN usuarios AS comercios ON cupones.comercio_id = comercios.id
+    SELECT 
+      cupones_usuarios.id,
+      cupones.titulo AS cupon,
+      cupones.descripcion,
+      cupones.descuento,
+      cupones_usuarios.utilizado,
+      cupones_usuarios.fecha_compra,
+      clientes.nombre AS cliente,
+      clientes.telefono,
+      v.nombre AS vendedor,
+      comercios.nombre AS comercio
+    FROM cupones_usuarios
+    JOIN cupones ON cupones_usuarios.cupon_id = cupones.id
+    JOIN usuarios AS clientes ON cupones_usuarios.usuario_id = clientes.id
+    JOIN usuarios AS comercios ON cupones.comercio_id = comercios.id
+    LEFT JOIN vendedores v ON clientes.vendedor_id = v.id
     `);
     res.json(reporte);
   } catch (err) {
@@ -199,5 +202,94 @@ router.put('/grupos/:id', verificarToken, soloAdmin, async (req, res) => {
     res.status(500).json({ error: "Error al actualizar grupo" });
   }
 });
+
+// 🔹 Obtener todos los vendedores
+router.get('/vendedores', verificarToken, soloAdmin, async (req, res) => {
+  const [vendedores] = await pool.query('SELECT * FROM vendedores');
+  res.json(vendedores);
+});
+
+// 🔹 Crear nuevo vendedor
+router.post('/vendedores', verificarToken, soloAdmin, async (req, res) => {
+  const { nombre, email, telefono } = req.body;
+  if (!nombre || !email) return res.status(400).json({ error: "Faltan datos" });
+
+  try {
+    const [result] = await pool.query(`
+      INSERT INTO vendedores (nombre, email, telefono)
+      VALUES (?, ?, ?)`, [nombre, email, telefono]);
+      res.json({ message: "Vendedor creado", id: result.insertId });
+  } catch (err) {
+    console.error("❌ Error al crear vendedor:", err);
+    res.status(500).json({ error: "Error al crear vendedor" });
+  }
+});
+
+// 🔹 Cambiar estado activo/inactivo
+router.put('/vendedores/:id/estado', verificarToken, soloAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { activo } = req.body;
+
+  try {
+    await pool.query("UPDATE vendedores SET activo = ? WHERE id = ?", [activo, id]);
+    res.json({ message: "Estado actualizado" });
+  } catch (err) {
+    console.error("❌ Error al cambiar estado:", err);
+    res.status(500).json({ error: "Error al actualizar" });
+  }
+});
+
+// 🔹 Cambiar vendedor asignado a un cliente
+router.put('/clientes/:id/telefono', verificarToken, soloAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { telefono } = req.body;
+
+  if (!telefono) {
+    return res.status(400).json({ error: 'Teléfono requerido' });
+  }
+
+  try {
+    await pool.query("UPDATE usuarios SET telefono = ? WHERE id = ?", [telefono, id]);
+    res.json({ message: "Teléfono actualizado" });
+  } catch (err) {
+    console.error("❌ Error al actualizar teléfono:", err);
+    res.status(500).json({ error: "Error al actualizar teléfono" });
+  }
+});
+
+router.put('/vendedores/:id/actualizar', verificarToken, soloAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { campo, valor } = req.body;
+
+  const camposPermitidos = ['nombre', 'email', 'telefono'];
+  if (!camposPermitidos.includes(campo)) {
+    return res.status(400).json({ error: 'Campo no permitido' });
+  }
+
+  try {
+    await pool.query(`UPDATE vendedores SET ${campo} = ? WHERE id = ?`, [valor, id]);
+    res.json({ message: 'Vendedor actualizado' });
+  } catch (err) {
+    console.error("❌ Error al actualizar vendedor:", err);
+    res.status(500).json({ error: 'Error al actualizar vendedor' });
+  }
+});
+
+// 🔍 Obtener clientes de un vendedor específico
+router.get('/vendedores/:id/clientes', verificarToken, soloAdmin, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [clientes] = await pool.query(`
+      SELECT id, nombre, email, telefono FROM usuarios
+      WHERE tipo = 'cliente' AND vendedor_id = ?
+    `, [id]);
+
+    res.json(clientes);
+  } catch (err) {
+    console.error("❌ Error al obtener clientes:", err);
+    res.status(500).json({ error: "Error al obtener clientes del vendedor" });
+  }
+});
+
 
 module.exports = router;

@@ -28,8 +28,8 @@ router.post('/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     await pool.query(
-      'INSERT INTO usuarios (nombre, email, password, tipo) VALUES (?, ?, ?, ?)',
-      [nombre, email, hashedPassword, tipo]
+      'INSERT INTO usuarios (nombre, email, password, tipo, telefono, vendedor_id) VALUES (?, ?, ?, ?, ?, ?)',
+      [nombre, email, hashedPassword, tipo, req.body.telefono, req.body.vendedor_id]
     );
 
     res.status(201).json({ message: 'Usuario registrado con éxito' });

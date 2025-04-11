@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punto Social</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="container-m head">
+            <a  href="/frontend/index.html"><img src="/frontend/img/logo.PNG"></a>
+            <nav class="nav">
+                <ul class="nav-bar">
+                    <li><a href="/frontend/quienes-somos.html">Nosotros</a></li>
+                    <li><a href="/frontend/servicios.html">Servicios</a></li>
+                    <li><a href="/frontend/contacto.html">Contacto</a></li>
+                    <li class="log-in"><a href="/frontend/ingresa.html">Ingresa</a></li>
+                    <li class="join-us"><a href="/frontend/unete.html">Únete</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <section class="bg-black">
+            <div class="container-m restaurantes">
+                <h1>Restaurantes</h1>
+                <div class="restaurantes-list">
+                    <div class="restaurante">
+                        <div class="galeria-restaurante galeria">
+                            <img src="/frontend/img/1.jpg" alt="restaurante" onclick="abrirCarrusel(0)">
+                            <img src="/frontend/img/2.jpg" alt="restaurante" onclick="abrirCarrusel(1)">
+                            <img src="/frontend/img/3.jpg" alt="restaurante" onclick="abrirCarrusel(2)">
+                            <div id="modalCarrusel" class="modal">
+                                <span class="cerrar" onclick="cerrarCarrusel()">×</span>
+                                <img class="modal-contenido" id="imgCarrusel">
+                                <a class="flecha izquierda" onclick="cambiarImagen(-1)">❮</a>
+                                <a class="flecha derecha" onclick="cambiarImagen(1)">❯</a>
+                            </div>
+                        </div>
+                        <h3>Restaurante 1</h3>
+                        <p>$500 p/p</p>
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolores, incidunt magnam fugit dolor odio doloremque voluptatibus illum ad? Nesciunt illum facilis suscipit blanditiis ex vel totam modi porro saepe nemo!</p>
+                        <p>Dirección: Lorem ipsum dolor, sit amet consectetur adipisicing elit.</p>
+                        <p>442 123 8556</p>
+                    </div>
+                    <div class="restaurante">
+                        <div class="galeria-restaurante galeria">
+                            <img src="/frontend/img/1.jpg" alt="restaurante" onclick="abrirCarrusel(0)">
+                            <img src="/frontend/img/2.jpg" alt="restaurante" onclick="abrirCarrusel(1)">
+                            <img src="/frontend/img/3.jpg" alt="restaurante" onclick="abrirCarrusel(2)">
+                            <div id="modalCarrusel" class="modal">
+                                <span class="cerrar" onclick="cerrarCarrusel()">×</span>
+                                <img class="modal-contenido" id="imgCarrusel">
+                                <a class="flecha izquierda" onclick="cambiarImagen(-1)">❮</a>
+                                <a class="flecha derecha" onclick="cambiarImagen(1)">❯</a>
+                            </div>
+                        </div>
+                        <h3>Restaurante 1</h3>
+                        <p>$500 p/p</p>
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolores, incidunt magnam fugit dolor odio doloremque voluptatibus illum ad? Nesciunt illum facilis suscipit blanditiis ex vel totam modi porro saepe nemo!</p>
+                        <p>Dirección: Lorem ipsum dolor, sit amet consectetur adipisicing elit.</p>
+                        <p>442 123 8556</p>
+                    </div>
+                    <div class="restaurante">
+                        <div class="galeria-restaurante galeria">
+                            <img src="/frontend/img/1.jpg" alt="restaurante" onclick="abrirCarrusel(0)">
+                            <img src="/frontend/img/2.jpg" alt="restaurante" onclick="abrirCarrusel(1)">
+                            <img src="/frontend/img/3.jpg" alt="restaurante" onclick="abrirCarrusel(2)">
+                            <div id="modalCarrusel" class="modal">
+                                <span class="cerrar" onclick="cerrarCarrusel()">×</span>
+                                <img class="modal-contenido" id="imgCarrusel">
+                                <a class="flecha izquierda" onclick="cambiarImagen(-1)">❮</a>
+                                <a class="flecha derecha" onclick="cambiarImagen(1)">❯</a>
+                            </div>
+                        </div>
+                        <h3>Restaurante 1</h3>
+                        <p>$500 p/p</p>
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolores, incidunt magnam fugit dolor odio doloremque voluptatibus illum ad? Nesciunt illum facilis suscipit blanditiis ex vel totam modi porro saepe nemo!</p>
+                        <p>Dirección: Lorem ipsum dolor, sit amet consectetur adipisicing elit.</p>
+                        <p>442 123 8556</p>
+                    </div>
+                    <div class="restaurante">
+                        <div class="galeria-restaurante galeria">
+                            <img src="/frontend/img/1.jpg" alt="restaurante" onclick="abrirCarrusel(0)">
+                            <img src="/frontend/img/2.jpg" alt="restaurante" onclick="abrirCarrusel(1)">
+                            <img src="/frontend/img/3.jpg" alt="restaurante" onclick="abrirCarrusel(2)">
+                            <div id="modalCarrusel" class="modal">
+                                <span class="cerrar" onclick="cerrarCarrusel()">×</span>
+                                <img class="modal-contenido" id="imgCarrusel">
+                                <a class="flecha izquierda" onclick="cambiarImagen(-1)">❮</a>
+                                <a class="flecha derecha" onclick="cambiarImagen(1)">❯</a>
+                            </div>
+                        </div>
+                        <h3>Restaurante 1</h3>
+                        <p>$500 p/p</p>
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolores, incidunt magnam fugit dolor odio doloremque voluptatibus illum ad? Nesciunt illum facilis suscipit blanditiis ex vel totam modi porro saepe nemo!</p>
+                        <p>Dirección: Lorem ipsum dolor, sit amet consectetur adipisicing elit.</p>
+                        <p>442 123 8556</p>
+                    </div>
+                    <div class="restaurante">
+                        <div class="galeria-restaurante galeria">
+                            <img src="/frontend/img/1.jpg" alt="restaurante" onclick="abrirCarrusel(0)">
+                            <img src="/frontend/img/2.jpg" alt="restaurante" onclick="abrirCarrusel(1)">
+                            <img src="/frontend/img/3.jpg" alt="restaurante" onclick="abrirCarrusel(2)">
+                            <div id="modalCarrusel" class="modal">
+                                <span class="cerrar" onclick="cerrarCarrusel()">×</span>
+                                <img class="modal-contenido" id="imgCarrusel">
+                                <a class="flecha izquierda" onclick="cambiarImagen(-1)">❮</a>
+                                <a class="flecha derecha" onclick="cambiarImagen(1)">❯</a>
+                            </div>
+                        </div>
+                        <h3>Restaurante 1</h3>
+                        <p>$500 p/p</p>
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolores, incidunt magnam fugit dolor odio doloremque voluptatibus illum ad? Nesciunt illum facilis suscipit blanditiis ex vel totam modi porro saepe nemo!</p>
+                        <p>Dirección: Lorem ipsum dolor, sit amet consectetur adipisicing elit.</p>
+                        <p>442 123 8556</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="section-6 bg-black">
+            <div class="container-m contact">
+                <a href="/frontend/contacto.html"><img src="/frontend/img/logo-neg.PNG" alt="logo black"></a>
+                <a href="/frontend/contacto.html"><h3>Contáctanos</h3></a>
+                <p>Escríbanos para recibir una cotización sobre proyectos creativos en cualquier parte del mundo.</p>
+                <p>Teléfonos Querétaro:</p>
+                <div class="phones">
+                    <a href="tel:4481202409" target="_blank"><p>448-120-2409</p></a>
+                    <a href="tel:4481202409" target="_blank"><p>448-136-6363</p></a>
+                    <!-- <p>449-417-7400</p> -->
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="footer bg-black">
+        <div class="social">
+            <a href="https://www.facebook.com/people/Punto-Social/61573128405104/?mibextid=wwXIfr&rdid=dsoJ4OM5x1Ak9SkS&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F12HULzzNEgn%2F%3Fmibextid%3DwwXIfr" target="_blank"><li><img src="/frontend/img/facebook.png"></li></a>
+            <a href="https://www.instagram.com/puntosocialoficial" target="_blank"><li><img src="/frontend/img/instagram.png"></li></a>
+            <a href="https://www.tiktok.com/@puntosocialoficial?_t=ZM-8uyzSRk6Xyf&_r=1" target="_blank"><li><img src="/frontend/img/tiktok.png"></li></a>
+            <a href="https://wa.me/524481202409" target="_blank"><li><img src="/frontend/img/whatsapp.png"></li></a>
+        </div>
+        <p class="copyright">Punto Social 2025©</p>
+        <p class="copyright">Todos los derechos reservados.</p>
+    </footer>
+    <script>
+        const imagenes = Array.from(document.querySelectorAll(".galeria img")).map(img => img.src);
+      
+        let indiceActual = 0;
+      
+        function abrirCarrusel(indice) {
+          indiceActual = indice;
+          mostrarImagen();
+          document.getElementById("modalCarrusel").style.display = "block";
+        }
+      
+        function mostrarImagen() {
+          document.getElementById("imgCarrusel").src = imagenes[indiceActual];
+        }
+      
+        function cambiarImagen(direccion) {
+          indiceActual += direccion;
+          if (indiceActual < 0) indiceActual = imagenes.length - 1;
+          if (indiceActual >= imagenes.length) indiceActual = 0;
+          mostrarImagen();
+        }
+      
+        function cerrarCarrusel() {
+          document.getElementById("modalCarrusel").style.display = "none";
+        }
+      
+        // Opcional: cerrar con tecla ESC
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") cerrarCarrusel();
+          if (e.key === "ArrowLeft") cambiarImagen(-1);
+          if (e.key === "ArrowRight") cambiarImagen(1);
+        });
+      </script>
+</body>
+</html>

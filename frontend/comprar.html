@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Compra de Cupones</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Punto Social | Comprar</title>
+  <link rel="stylesheet" href="styles.css">
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 20px; }
+    body { background: #f4f4f4;}
     .grupo {
       background: white; padding: 15px; margin: 10px auto; max-width: 600px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 6px solid #007bff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 6px solid red;
     }
     .grupo h2 { margin: 0 0 10px; }
     .grupo p { margin: 5px 0; }
@@ -20,14 +22,18 @@
   </style>
 </head>
 <body>
-    <p id="usuarioSaludo" style="text-align:right; margin-bottom: 10px;"></p>
-  <h1>Compra de Cupones</h1>
-  <div id="contenedor-grupos"></div>
-
+  <header class="header">
+    <div class="container-m head">
+        <a  href="/frontend/index.html"><img src="/frontend/img/logo.PNG"></a>
+        <p id="usuarioSaludo" class="saludo"></p>
+    </div>
+  </header>
+  <section class="container-m">
+    <h1>Compra de Cupones</h1>
+    <div id="contenedor-grupos"></div>
+  </section>
+  <script src="js/api.js"></script>
   <script>
-      const API = window.location.hostname.includes("localhost")
-      ? "http://localhost:3000"
-      : "https://api.miapp.com";
   document.addEventListener("DOMContentLoaded", async () => {
     const contenedorGrupos = document.getElementById('contenedor-grupos');
     const token = localStorage.getItem("token");
@@ -35,7 +41,7 @@
     // Mostrar saludo si hay token
     if (token) {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      document.getElementById("usuarioSaludo").textContent = `Hola, ${payload.nombre} 👋`;
+      document.getElementById("usuarioSaludo").textContent = `Hola ${payload.nombre}`;
     }
 
     // Si hay grupo pendiente (desde login), iniciar compra

@@ -2,11 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Mis Cupones</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Punto Social | Cupones</title>
+  <link rel="stylesheet" href="styles.css">
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
+    body { background: #f4f4f4;}
     header {
-      background: #007bff;
       color: white;
       padding: 10px 20px;
       display: flex;
@@ -14,7 +15,6 @@
       align-items: center;
     }
     header h1 { margin: 0; font-size: 22px; }
-    header span { font-style: italic; font-size: 14px; }
     #filtros { text-align: center; margin: 20px 0; }
     #filtros button { margin: 0 5px; padding: 8px 16px; cursor: pointer; }
     .cupon {
@@ -28,7 +28,6 @@
     .cupon.usado { border-color: #28a745; opacity: 0.7; }
     .cupon.no-usado { border-color: #dc3545; }
     .estado { font-weight: bold; }
-    #cupones-container p { text-align: center; font-style: italic; }
     #cerrar {
       display: block;
       margin: 30px auto;
@@ -41,23 +40,26 @@
   </style>
 </head>
 <body>
-  <header>
+  <header class="header">
+    <div class="container-m head">
+        <a  href="/frontend/index.html"><img src="/frontend/img/logo.PNG"></a>
+    </div>
     <h1>Mis Cupones</h1>
     <span id="usuarioNombre"></span>
-    <div style="text-align:center; margin-top: 20px;">
-      <button onclick="irAComprar()" style="padding: 10px 20px; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-        🛒 Comprar cupones
-      </button>
-    </div>
   </header>
-
+  <div style="text-align:center; margin-top: 20px;">
+    <button onclick="irAComprar()" style="padding: 10px 20px; font-size: 16px; background: red; color: white; border: none; border-radius: 5px; cursor: pointer;">
+      🛒 Comprar cupones
+    </button>
+  </div>
+  
   <div id="filtros">
     <button onclick="filtrar('todos')">Todos</button>
     <button onclick="filtrar('no-usado')">Disponibles</button>
     <button onclick="filtrar('usado')">Usados</button>
   </div>
-
-  <div id="cupones-container"></div>
+  
+  <div id="cupones-container" class="cuponescliente"></div>
   <button id="cerrar" onclick="cerrarSesion()">Cerrar sesión</button>
   <script src="js/api.js"></script>
   <script>
@@ -90,7 +92,7 @@
         const payload = JSON.parse(atob(token.split('.')[1]));
         const ahora = Math.floor(Date.now() / 1000);
         if (payload.exp < ahora) {
-          alert("Tu sesión ha expirado. Iniciá sesión nuevamente.");
+          alert("Tu sesión ha expirado. Inicia sesión nuevamente.");
           localStorage.removeItem("token");
           window.location.href = "ingresa.html";
           return null;
@@ -131,7 +133,7 @@
         return true;
       });
       if (filtrados.length === 0) {
-        contenedor.innerHTML = "<p>No tenés cupones en esta categoría.</p>";
+        contenedor.innerHTML = "<p>No tienes cupones en esta categoría.</p>";
         return;
       }
       filtrados.forEach(c => {
@@ -142,7 +144,7 @@
           <p><strong>Descripción:</strong> ${c.descripcion}</p>
           <p><strong>Descuento:</strong> ${c.descuento}</p>
           <p><strong>Válido hasta:</strong> ${new Date(c.fecha_expiracion).toLocaleDateString()}</p>
-          <p class="estado">${c.utilizado ? "✅ Ya fue usado" : "❌ Disponible"}</p>
+          <p class="estado">${c.utilizado ? "❌ Ya fue usado" : "✅ Disponible"}</p>
         `;
         contenedor.appendChild(div);
       });
