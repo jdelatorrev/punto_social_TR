@@ -19,19 +19,21 @@ router.get('/usuarios', verificarToken, soloAdmin, async (req, res) => {
 
 // 🔹 Obtener todos los grupos de cupones
 router.get('/grupos', verificarToken, soloAdmin, async (req, res) => {
-  const [grupos] = await pool.query('SELECT id, nombre, descripcion, precio FROM grupos');
+  const [grupos] = await pool.query('SELECT id, nombre, descripcion, precio, fecha_inicio, fecha_fin FROM grupos');
   res.json(grupos);
 });
 
 // 🔹 Crear un nuevo grupo
 router.post('/grupos', verificarToken, soloAdmin, async (req, res) => {
-  const { nombre, descripcion, precio } = req.body;
-  if (!nombre || isNaN(precio)) return res.status(400).json({ error: 'Faltan datos' });
+  const { nombre, descripcion, precio, fecha_inicio, fecha_fin } = req.body;
+  if (!nombre || isNaN(precio) || !fecha_inicio || !fecha_fin) {
+    return res.status(400).json({ error: 'Faltan datos' });
+  }
 
   try {
     const [resultado] = await pool.query(
-      'INSERT INTO grupos (nombre, descripcion, precio) VALUES (?, ?, ?)',
-      [nombre, descripcion || '', precio]
+      'INSERT INTO grupos (nombre, descripcion, precio, fecha_inicio, fecha_fin) VALUES (?, ?, ?, ?, ?)',
+      [nombre, descripcion || '', precio, fecha_inicio, fecha_fin]
     );
     res.json({ message: 'Grupo creado', id: resultado.insertId });
   } catch (err) {
@@ -187,7 +189,7 @@ router.get('/reporte-cupones', verificarToken, soloAdmin, async (req, res) => {
 
 // 🔄 Actualizar descripción de grupo
 router.put('/grupos/:id', verificarToken, soloAdmin, async (req, res) => {
-  const { descripcion, precio } = req.body;
+  const { descripcion, precio, fecha_inicio, fecha_fin } = req.body;
   const { id } = req.params;
 
   if (!descripcion || isNaN(precio)) {
@@ -195,7 +197,11 @@ router.put('/grupos/:id', verificarToken, soloAdmin, async (req, res) => {
   }
 
   try {
-    await pool.query("UPDATE grupos SET descripcion = ?, precio = ? WHERE id = ?", [descripcion, precio, id]);
+    await pool.query(`
+      UPDATE grupos 
+      SET descripcion = ?, precio = ?, fecha_inicio = ?, fecha_fin = ?
+      WHERE id = ?
+    `, [descripcion, precio, fecha_inicio, fecha_fin, id]);
     res.json({ message: "Grupo actualizado correctamente" });
   } catch (err) {
     console.error("❌ Error al actualizar grupo:", err);

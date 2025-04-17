@@ -1,0 +1,117 @@
+<header class="header">
+    <div class="container-m head">
+      <a href="/frontend/index.html"><img src="/frontend/img/logo.PNG" alt="Logo"></a>
+  
+      <!-- Botón de hamburguesa -->
+      <div class="menu-toggle" id="menu-toggle">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+      </div>
+      <!-- Menú de navegación -->
+      <nav class="nav">
+        <ul class="nav-bar" id="nav-menu">
+          <li><a href="/frontend/quienes-somos.html">Nosotros</a></li>
+          <li><a href="/frontend/servicios.html">Servicios</a></li>
+          <li><a href="/frontend/categorias.html">Categorías</a></li>
+          <li><a href="/frontend/contacto.html">Contacto</a></li>
+          <li class="log-in"><a href="/frontend/ingresa.html">Ingresa</a></li>
+          <li class="join-us"><a href="/frontend/unete.html">Únete</a></li>
+        </ul>
+      </nav>
+    </div>
+  
+  </header>
+  
+  <style>
+    .header {
+      background-color: #000;
+      color: white;
+      padding: 10px 20px;
+    }
+  
+    .container-m.head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+    }
+  
+    .menu-toggle .bar {
+      width: 25px;
+      height: 3px;
+      background-color: red;
+      transition: all 0.3s ease;
+    }
+  
+    .nav-bar {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+      padding: 0;
+      margin: 0;
+    }
+  
+    .nav-bar li a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  
+    /* Estilos móviles */
+    @media (max-width: 768px) {
+      .nav {
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height 0.5s ease, opacity 0.5s ease;
+        opacity: 0;
+      }
+  
+      .nav.show {
+        max-height: 500px;
+        opacity: 1;
+      }
+  
+      .nav-bar {
+        flex-direction: column;
+        text-align: center;
+        background-color: #000;
+        margin-top: 3rem;
+      }
+/*   
+      .nav-bar li {
+        padding: 10px 0;
+      } */
+  
+      .menu-toggle {
+        display: flex;
+      }
+    }
+  </style>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const toggle = document.getElementById("menu-toggle");
+      const nav = document.querySelector(".nav");
+      const navLinks = document.querySelectorAll(".nav-bar a");
+  
+      // Abrir/cerrar menú al hacer click en el botón hamburguesa
+      toggle.addEventListener("click", () => {
+        nav.classList.toggle("show");
+      });
+  
+      // Cerrar menú al hacer clic en un enlace del menú
+      navLinks.forEach(link => {
+        link.addEventListener("click", () => {
+          nav.classList.remove("show");
+        });
+      });
+    });
+  </script>
+  

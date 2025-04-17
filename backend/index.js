@@ -66,3 +66,60 @@ app.listen(PORT, () => {
   console.log(`✅ Servidor corriendo en puerto ${PORT}`);
 });
 
+// Ruta pública para obtener grupos con comercios únicos y cupones anidados
+app.get("/api/grupos", async (req, res) => {
+  try {
+    const [grupos] = await pool.query(`
+      SELECT id, nombre, descripcion, precio, fecha_inicio, fecha_fin
+      FROM grupos
+    `);
+
+    const [cupones] = await pool.query(`
+      SELECT 
+        c.id, c.titulo, c.descripcion, c.descuento, 
+        c.fecha_expiracion, c.grupo_id, u.nombre AS comercio
+      FROM cupones c
+      JOIN usuarios u ON c.comercio_id = u.id
+      WHERE u.tipo = 'comercio'
+    `);
+
+    const gruposConDatos = grupos.map(grupo => {
+      const cuponesDelGrupo = cupones.filter(c => c.grupo_id === grupo.id);
+
+      const comerciosUnicos = [
+        ...new Set(cuponesDelGrupo.map(c => c.comercio))
+      ];
+
+      const vigencia = grupo.fecha_inicio && grupo.fecha_fin
+        ? `Válido del ${new Date(grupo.fecha_inicio).toLocaleDateString()} al ${new Date(grupo.fecha_fin).toLocaleDateString()}`
+        : "Sin definir";
+
+        return {
+          id: grupo.id,
+          nombre: grupo.nombre,
+          descripcion: grupo.descripcion,
+          precio: grupo.precio,
+          cupones: cuponesDelGrupo.map(c => ({
+            titulo: c.titulo,
+            comercio: c.comercio
+          })),
+          comercios: comerciosUnicos,
+          vigencia: grupo.fecha_inicio && grupo.fecha_fin
+            ? `Del ${grupo.fecha_inicio} al ${grupo.fecha_fin}`
+            : null,
+          fecha_inicio: grupo.fecha_inicio,
+          fecha_fin: grupo.fecha_fin
+        };
+    });
+
+    res.json(gruposConDatos);
+  } catch (err) {
+    console.error("❌ Error al obtener grupos:", err);
+    res.status(500).json({ error: "Error al obtener grupos" });
+  }
+});
+
+
+
+
+

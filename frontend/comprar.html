@@ -34,84 +34,103 @@
   </section>
   <script src="js/api.js"></script>
   <script>
-  document.addEventListener("DOMContentLoaded", async () => {
-    const contenedorGrupos = document.getElementById('contenedor-grupos');
-    const token = localStorage.getItem("token");
-
-    // Mostrar saludo si hay token
-    if (token) {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      document.getElementById("usuarioSaludo").textContent = `Hola ${payload.nombre}`;
-    }
-
-    // Si hay grupo pendiente (desde login), iniciar compra
-    const urlParams = new URLSearchParams(window.location.search);
-    const grupo = urlParams.get("grupo");
-    if (grupo && token) {
-      await comprarGrupo(grupo);
-    }
-
-    // Cargar todos los grupos y mostrarlos
-    try {
-      const res = await fetch(`${API}/api/grupos`);
-      if (!res.ok) throw new Error('Error al obtener los grupos');
-      const grupos = await res.json();
-
-      grupos.forEach(grupo => {
+    document.addEventListener("DOMContentLoaded", async () => {
+      const contenedorGrupos = document.getElementById('contenedor-grupos');
+      const token = localStorage.getItem("token");
+  
+      if (token) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        document.getElementById("usuarioSaludo").textContent = `Hola ${payload.nombre}`;
+      }
+  
+      try {
+        const res = await fetch(`${API}/api/grupos`, {
+          cache: "no-store" // evita usar caché
+        });
+        if (!res.ok) throw new Error('Error al obtener los grupos');
+        const grupos = await res.json();
+  
+        console.log("📦 Datos de grupos recibidos:", grupos);
+  
+        grupos.forEach(grupo => {
         const div = document.createElement('div');
         div.className = 'grupo';
 
-        const cuponesHTML = grupo.cupones.length
-          ? grupo.cupones.map(c => `<li>${c.titulo} <em>(${c.comercio})</em></li>`).join('')
-          : '<li>No hay cupones asignados aún.</li>';
+        // ✅ Sacamos los comercios únicos desde los cupones
+        const comerciosUnicos = [
+          ...new Set((grupo.cupones || []).map(c => c.comercio))
+        ];
 
-        div.innerHTML = `
-          <h2>${grupo.nombre}</h2>
-          <p><strong>Precio:</strong> $${Number(grupo.precio).toFixed(2)}</p>
-          <p><strong>Cupones incluidos:</strong></p>
-          <ul>${cuponesHTML}</ul>
-          <button class="boton-comprar" onclick="comprarGrupo(${grupo.id})">Comprar</button>
-        `;
-
-        contenedorGrupos.appendChild(div);
-      });
-    } catch (error) {
-      console.error('Error al cargar los grupos:', error);
-      contenedorGrupos.innerHTML = '<p>Error al cargar los grupos de cupones.</p>';
-    }
-  });
-
-  async function comprarGrupo(grupoId) {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      localStorage.setItem("grupoPendiente", grupoId);
-      alert("Debes iniciar sesión para continuar con la compra.");
-      window.location.href = "ingresa.html";
-      return;
-    }
-
-    try {
-      const res = await fetch(`${API}/api/crear-preferencia/${grupoId}`, {
-        method: "POST",
-        headers: {
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json"
-        }
-      });
-
-      const data = await res.json();
-      if (res.ok && data.init_point) {
-        window.location.href = data.init_point;
-      } else {
-        alert(data.error || "Error al generar preferencia de pago");
+        const comerciosList = comerciosUnicos.length
+          ? comerciosUnicos.map(com => `<li>${com}</li>`).join('')
+          : "<li>No hay comercios asignados aún.</li>";
+  
+          div.innerHTML = `
+            <h2>
+              <img src="/frontend/img/logo.PNG" alt="Logo" style="height: 24px; vertical-align: middle; margin-right: 8px;">
+              ${grupo.nombre}
+            </h2>
+            <p><strong>Incluye:</strong> 10 cupones con 6 usos cada uno</p>
+            <p><em>Total: 60 Beneficios Exclusivos</em></p>
+            <p><strong>Precio:</strong> $${Number(grupo.precio).toFixed(2)}</p>
+            <p><strong>Vigencia:</strong> ${grupo.vigencia 
+              ? `Del ${formatearFecha(grupo.fecha_inicio)} al ${formatearFecha(grupo.fecha_fin)}`
+              : "Sin definir"}
+            </p>
+            <p><strong>Aplica en los siguientes comercios:</strong></p>
+            <ul>${comerciosList}</ul>
+            <button class="boton-comprar" onclick="comprarGrupo(${grupo.id})">Comprar</button>
+          `;
+  
+          contenedorGrupos.appendChild(div);
+        });
+  
+      } catch (error) {
+        console.error('Error al cargar los grupos:', error);
+        contenedorGrupos.innerHTML = '<p>Error al cargar los grupos de cupones.</p>';
       }
-
-    } catch (err) {
-      console.error("❌ Error al crear preferencia:", err);
-      alert("Error al iniciar el pago.");
+    });
+  
+    async function comprarGrupo(grupoId) {
+      const token = localStorage.getItem("token");
+  
+      if (!token) {
+        localStorage.setItem("grupoPendiente", grupoId);
+        alert("Debes iniciar sesión para continuar con la compra.");
+        window.location.href = "ingresa.html";
+        return;
+      }
+  
+      try {
+        const res = await fetch(`${API}/api/crear-preferencia/${grupoId}`, {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json"
+          }
+        });
+  
+        const data = await res.json();
+        if (res.ok && data.init_point) {
+          window.location.href = data.init_point;
+        } else {
+          alert(data.error || "Error al generar preferencia de pago");
+        }
+  
+      } catch (err) {
+        console.error("❌ Error al crear preferencia:", err);
+        alert("Error al iniciar el pago.");
+      }
     }
-  }
-  </script>
+
+    function formatearFecha(fechaISO) {
+      if (!fechaISO) return "Sin definir";
+      const fecha = new Date(fechaISO);
+      const dia = String(fecha.getDate()).padStart(2, '0');
+      const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+      const año = fecha.getFullYear();
+      return `${dia}-${mes}-${año}`;
+    }
+  </script>  
 </body>
 </html>
