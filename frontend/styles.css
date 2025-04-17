@@ -67,7 +67,7 @@ a{
     align-items: center;
     justify-content: space-between;
 }
-@media (max-width: 768px){
+@media (max-width: 950px){
   .head{
       display: flex;
       align-items: center;
@@ -81,7 +81,7 @@ a{
 .header img{
     width: 8rem;
 }
-@media (max-width: 768px){
+@media (max-width: 950px){
   .header img{
     margin-bottom:3rem ;
 }
