@@ -31,6 +31,7 @@
   <section class="container-m">
     <h1>Compra de Cupones</h1>
     <div id="contenedor-grupos"></div>
+    <div id="paypal-button-container-${grupo.id}"></div>
   </section>
   <script src="js/api.js"></script>
   <script>
@@ -90,38 +91,46 @@
         contenedorGrupos.innerHTML = '<p>Error al cargar los grupos de cupones.</p>';
       }
     });
-  
     async function comprarGrupo(grupoId) {
-      const token = localStorage.getItem("token");
-  
-      if (!token) {
-        localStorage.setItem("grupoPendiente", grupoId);
-        alert("Debes iniciar sesión para continuar con la compra.");
-        window.location.href = "ingresa.html";
-        return;
-      }
-  
-      try {
-        const res = await fetch(`${API}/api/crear-preferencia/${grupoId}`, {
-          method: "POST",
-          headers: {
-            Authorization: "Bearer " + token,
-            "Content-Type": "application/json"
-          }
-        });
-  
-        const data = await res.json();
-        if (res.ok && data.init_point) {
-          window.location.href = data.init_point;
-        } else {
-          alert(data.error || "Error al generar preferencia de pago");
-        }
-  
-      } catch (err) {
-        console.error("❌ Error al crear preferencia:", err);
-        alert("Error al iniciar el pago.");
-      }
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      localStorage.setItem("grupoPendiente", grupoId);
+      alert("Debes iniciar sesión para continuar con la compra.");
+      window.location.href = "ingresa.html";
+      return;
     }
+
+    try {
+      const res = await fetch(`${API}/api/crear-orden-paypal/${grupoId}`, {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + token
+        }
+      });
+
+      const text = await res.text();
+
+      try {
+        const data = JSON.parse(text);
+
+        if (res.ok && data.url) {
+          window.location.href = data.url; // 🔁 Redirige a PayPal
+        } else {
+          alert(data.error || "❌ Error al crear orden de PayPal");
+          console.warn("⚠️ Detalles de la respuesta:", data);
+        }
+      } catch (parseError) {
+        console.error("❌ Error al parsear JSON:", parseError);
+        console.log("Respuesta inesperada:", text);
+        alert("⚠️ El servidor respondió con datos inesperados:\n" + text);
+      }
+
+    } catch (err) {
+      console.error("❌ Error de red al crear orden:", err);
+      alert("Error de red al iniciar el pago.");
+    }
+  }
 
     function formatearFecha(fechaISO) {
       if (!fechaISO) return "Sin definir";

@@ -49,6 +49,8 @@ app.use('/api', require('./routes/cliente'));
 app.use('/api', require('./routes/comercio'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api', require('./routes/public'));
+app.use('/api', require('./routes/pagos'));
+
 
 // Ruta de prueba de conexión a DB
 app.get('/api/test-db', async (req, res) => {

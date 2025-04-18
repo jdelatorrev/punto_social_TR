@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../db');
 const verificarToken = require('../middleware/verificarToken');
 
+
 // Middleware para restringir solo a admins
 function soloAdmin(req, res, next) {
   if (req.user.tipo !== 'admin') {
