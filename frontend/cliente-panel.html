@@ -25,8 +25,8 @@
       max-width: 600px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    .cupon.usado { border-color: #28a745; opacity: 0.7; }
-    .cupon.no-usado { border-color: #dc3545; }
+    .cupon.usado { border-color: #dc3545; }
+    .cupon.no-usado { border-color: #28a745; }
     .estado { font-weight: bold; }
     #cerrar {
       display: block;
@@ -127,20 +127,37 @@
     function filtrar(filtro) {
       const contenedor = document.getElementById("cupones-container");
       contenedor.innerHTML = "";
-      const filtrados = cuponesGlobal.filter(c => {
-        if (filtro === 'usado') return c.utilizado;
-        if (filtro === 'no-usado') return !c.utilizado;
-        return true;
-      });
+
+      // Ordenamos por fecha_compra descendente
+      const cuponesOrdenados = [...cuponesGlobal].sort((a, b) => 
+        new Date(b.fecha_compra) - new Date(a.fecha_compra)
+      );
+
+      // Filtro aplicado
+      let filtrados = cuponesOrdenados;
+
+      if (filtro === 'usado') {
+        filtrados = cuponesOrdenados.filter(c => c.utilizado);
+      } else if (filtro === 'no-usado') {
+        filtrados = cuponesOrdenados.filter(c => !c.utilizado);
+      } else if (filtro === 'todos') {
+        // Mostrar primero los disponibles, luego los usados
+        const disponibles = cuponesOrdenados.filter(c => !c.utilizado);
+        const usados = cuponesOrdenados.filter(c => c.utilizado);
+        filtrados = [...disponibles, ...usados];
+      }
+
       if (filtrados.length === 0) {
         contenedor.innerHTML = "<p>No tienes cupones en esta categoría.</p>";
         return;
       }
+
       filtrados.forEach(c => {
         const div = document.createElement("div");
         div.className = "cupon " + (c.utilizado ? "usado" : "no-usado");
         div.innerHTML = `
           <h3>${c.titulo}</h3>
+          <p><strong>Comercio:</strong> ${c.comercio}</p>
           <p><strong>Descripción:</strong> ${c.descripcion}</p>
           <p><strong>Descuento:</strong> ${c.descuento}</p>
           <p><strong>Válido hasta:</strong> ${new Date(c.fecha_expiracion).toLocaleDateString()}</p>

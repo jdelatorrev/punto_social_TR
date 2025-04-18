@@ -5,6 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Punto Social</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        form {
+          max-width: 400px;
+          /* background: white; */
+          padding: 20px;
+          margin: auto;
+          /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
+        }
+        input, button, select {
+          width: 100%;
+          margin-bottom: 10px;
+          padding: 10px;
+          font-size: 16px;
+        }
+        button {
+          background: #17a2b8;
+          color: white;
+          border: none;
+          cursor: pointer;
+        }
+        button:hover {
+          background: #117a8b;
+        }
+        .error {
+          background: #f8d7da;
+          color: #721c24;
+          padding: 10px;
+          margin-bottom: 10px;
+          border-left: 4px solid #dc3545;
+        }
+      </style>
 </head>
 
 <body>
@@ -37,6 +68,44 @@
                     <a href="tel:4481202409" target="_blank"><p>448-136-6363</p></a>
                     <!-- <p>449-417-7400</p> -->
                 </div>
+            </div>
+        </section>
+        <section class="section-6">
+            <div class="container-m unete">
+                <div>
+                    <h3>Únete a Nosotros</h3>
+                    <p>Especialistas en ventas por cupones,
+                        ayudamos a tu negocio a crecer y atraer
+                        nuevos clientes.</p>
+                    <p>¿Eres cliente?
+                        Te ofrecemos soluciones efectivas para
+                        aumentar tus ventas.</p>
+                        <p>¿Te gustaría trabajar con nosotros?
+                            Si eres creativo y apasionado del marketing,
+                            ¡únete a nuestro equipo!</p>
+                </div>
+                <form id="registroForm">
+                            <div id="mensajeError" class="error" style="display: none;"></div>
+                            <input type="text" name="nombre" placeholder="Tu nombre" required />
+                            <input type="email" name="email" placeholder="Correo electrónico" required />
+                            <input type="text" name="phone" placeholder="Teléfono" required />
+                            <input type="text" name="message" placeholder="Mensaje" required />
+                            <input type="text" name="category" placeholder="Servicio de Interés" required />
+                            <button type="submit">Enviar</button>
+                          </form>
+            </div>
+        </section>
+        <section class="section-6 bg-black">
+            <div class="container-m ofrecemos">
+                <h3>¿Qué Ofrecemos?</h3>
+                <p class="question"><span>Ambiente Creativo:</span> Únete a un equipo donde la creatividad fluye constantemente. En Punto Social, valoramos las
+                    ideas innovadoras que se traducen en resultados tangibles.</p>
+                <p class="question"><span>Desarrollo Profesional:</span> Ofrecemos oportunidades continuas de aprendizaje y crecimiento. En un campo tan
+                    dinámico como el marketing de cupones, siempre hay algo nuevo por descubrir.</p>
+                <p class="question"><span>Impacto Directo:</span> Trabaja en campañas que realmente hacen la diferencia. Desde estrategias digitales hasta
+                    campañas publicitarias, cada proyecto tiene un impacto real en el éxito de nuestros clientes.</p>
+                <p><span>Colaboración:</span> Forma parte de un equipo comprometido que trabaja de cerca con los clientes. En Punto Social,
+                        valoramos la colaboración y el compromiso con el éxito mutuo.</p>
             </div>
         </section>
     </main>
