@@ -72,7 +72,11 @@
       border: none;
       cursor: pointer;
     }
+    .swal2-popup {
+      font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+    }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <header class="header">
@@ -84,6 +88,14 @@
   </header>
   <div class="container-m">
     <h2>Cupones Vendidos</h2>
+    <div style="margin-bottom: 20px;">
+      <label for="filtroCliente">Filtrar por cliente:</label>
+      <select id="filtroCliente" onchange="aplicarFiltros()" style="margin-right:20px;"></select>
+    
+      <label for="buscador">Buscar:</label>
+      <input type="text" id="buscador" oninput="aplicarFiltros()" placeholder="Buscar cliente o cupón..." style="padding: 5px; width: 250px;">
+    </div>
+    <button id="cerrar" onclick="cerrarSesion()">Cerrar sesión</button>
     <table id="cuponesTable">
       <thead>
         <tr>
@@ -99,7 +111,7 @@
     </table>
   </div>
 
-  <button id="cerrar" onclick="cerrarSesion()">Cerrar sesión</button>
+
   <script src="js/api.js"></script>
   <script>
     let cuponesGlobal = [];
@@ -143,19 +155,26 @@
 
       const data = await res.json();
       cuponesGlobal = data;
+
+      const clientesUnicos = [...new Set(cuponesGlobal.map(c => c.cliente))];
+      const select = document.getElementById("filtroCliente");
+      select.innerHTML = `<option value="">-- Todos --</option>` + 
+        clientesUnicos.map(nombre => `<option value="${nombre}">${nombre}</option>`).join('');
+
       renderCupones();
     }
 
-    function renderCupones() {
+
+    function renderCupones(cupones = cuponesGlobal) {
       const tbody = document.querySelector("#cuponesTable tbody");
       tbody.innerHTML = "";
 
-      if (cuponesGlobal.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='6' style='text-align:center'>No hay cupones vendidos aún.</td></tr>";
+      if (cupones.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='6' style='text-align:center'>No hay cupones que coincidan.</td></tr>";
         return;
       }
 
-      cuponesGlobal.forEach(c => {
+      cupones.forEach(c => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${c.id}</td>
@@ -174,20 +193,65 @@
       });
     }
 
+    function aplicarFiltros() {
+      const clienteSeleccionado = document.getElementById("filtroCliente").value.toLowerCase();
+      const textoBusqueda = document.getElementById("buscador").value.toLowerCase();
+
+      const cuponesFiltrados = cuponesGlobal.filter(c => {
+        const coincideCliente = clienteSeleccionado === "" || c.cliente.toLowerCase() === clienteSeleccionado;
+        const coincideBusqueda = 
+          c.cliente.toLowerCase().includes(textoBusqueda) || 
+          c.titulo.toLowerCase().includes(textoBusqueda);
+        return coincideCliente && coincideBusqueda;
+      });
+
+      renderCupones(cuponesFiltrados);
+    }
+
+
     async function marcarComoUsado(id) {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API}/api/marcar-cupon-usado/${id}`, {
-        method: "POST",
-        headers: { Authorization: "Bearer " + token }
+
+      const confirmacion = await Swal.fire({
+        title: '¿Marcar cupón como usado?',
+        text: 'Esta acción no se puede deshacer.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, marcar',
+        cancelButtonText: 'Cancelar'
       });
-      const result = await res.json();
-      if (res.ok) {
-        alert("✅ Cupón marcado como usado");
-        cargarCuponesVendidos();
-      } else {
-        alert(result.error || "Error al actualizar");
+
+      if (!confirmacion.isConfirmed) return;
+
+      try {
+        const res = await fetch(`${API}/api/marcar-cupon-usado/${id}`, {
+          method: "POST",
+          headers: { Authorization: "Bearer " + token }
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          await Swal.fire({
+            title: '✅ Cupón marcado como usado',
+            text: 'Se ha actualizado correctamente.',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+          });
+          cargarCuponesVendidos();
+        } else {
+          await Swal.fire('Error', result.error || 'Error al actualizar el cupón.', 'error');
+        }
+
+      } catch (err) {
+        console.error("❌ Error al marcar cupón:", err);
+        await Swal.fire('Error', 'Error de red al marcar el cupón.', 'error');
       }
     }
+
 
     function cerrarSesion() {
       localStorage.removeItem("token");

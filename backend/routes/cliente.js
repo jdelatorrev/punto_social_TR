@@ -29,6 +29,30 @@ router.get('/mis-cupones', verificarToken, async (req, res) => {
   }
 });
 
+// Eliminar un cupón utilizado manualmente
+router.delete('/cupon-usuario/:id', verificarToken, async (req, res) => {
+  const usuarioId = req.user.id;
+  const cuponUsuarioId = req.params.id;
+
+  try {
+    const [result] = await pool.query(
+      'DELETE FROM cupones_usuarios WHERE id = ? AND usuario_id = ? AND utilizado = 1',
+      [cuponUsuarioId, usuarioId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Cupón no encontrado o no puede eliminarse' });
+    }
+
+    res.json({ mensaje: 'Cupón eliminado correctamente' });
+  } catch (error) {
+    console.error("❌ Error al eliminar cupón:", error);
+    res.status(500).json({ error: 'Error del servidor al eliminar el cupón' });
+  }
+});
+
+
+
 
 // ✅ Esto es lo que faltaba
 module.exports = router;

@@ -37,7 +37,23 @@
       border: none;
       cursor: pointer;
     }
+
+    header button#cerrar {
+      margin-left: 20px;
+      background: #dc3545;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    header button#cerrar:hover {
+      background: #c82333;
+    }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <header class="header">
@@ -53,14 +69,21 @@
     </button>
   </div>
   
+  <button id="cerrar" onclick="cerrarSesion()">Cerrar sesión</button>
   <div id="filtros">
     <button onclick="filtrar('todos')">Todos</button>
     <button onclick="filtrar('no-usado')">Disponibles</button>
     <button onclick="filtrar('usado')">Usados</button>
+  
+    <br><br>
+    <label for="filtroComercio">Filtrar por comercio:</label>
+    <select id="filtroComercio" onchange="aplicarFiltros()" style="margin-right: 20px;"></select>
+  
+    <label for="buscadorCupon">Buscar:</label>
+    <input type="text" id="buscadorCupon" oninput="aplicarFiltros()" placeholder="Buscar cupón o comercio..." style="padding: 5px; width: 250px;">
   </div>
   
   <div id="cupones-container" class="cuponescliente"></div>
-  <button id="cerrar" onclick="cerrarSesion()">Cerrar sesión</button>
   <script src="js/api.js"></script>
   <script>
 
@@ -69,6 +92,17 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+      // Verifica si hay compra reciente
+      if (localStorage.getItem("mostrarMensajeCompra") === "true") {
+        localStorage.removeItem("mostrarMensajeCompra");
+        Swal.fire({
+          title: "¡Gracias por tu compra!",
+          text: "Aquí están tus nuevos cupones 🎉",
+          icon: "success",
+          confirmButtonText: "Ver cupones"
+        });
+      }
+
       const grupoPendiente = localStorage.getItem("grupoPendiente");
 
       if (grupoPendiente) {
@@ -79,6 +113,7 @@
         }
       }
 
+      cargarCupones();
     });
     let cuponesGlobal = [];
 
@@ -111,44 +146,49 @@
       window.location.href = "ingresa.html";
     }
 
-    async function cargarCupones() {
-      const payload = verificarTokenValido();
-      if (!payload || payload.tipo !== "cliente") return;
-      document.getElementById("usuarioNombre").textContent = payload.nombre;
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API}/api/mis-cupones`, {
-        headers: { Authorization: "Bearer " + token }
-      });
-      const data = await res.json();
-      cuponesGlobal = data;
-      filtrar('todos');
-    }
+
+    let filtroEstado = "todos"; // mantiene el filtro seleccionado
 
     function filtrar(filtro) {
+      filtroEstado = filtro;
+      aplicarFiltros();
+    }
+
+    function aplicarFiltros() {
       const contenedor = document.getElementById("cupones-container");
       contenedor.innerHTML = "";
 
-      // Ordenamos por fecha_compra descendente
-      const cuponesOrdenados = [...cuponesGlobal].sort((a, b) => 
-        new Date(b.fecha_compra) - new Date(a.fecha_compra)
-      );
+      const comercioSeleccionado = document.getElementById("filtroComercio").value.toLowerCase();
+      const textoBusqueda = document.getElementById("buscadorCupon").value.toLowerCase();
 
-      // Filtro aplicado
-      let filtrados = cuponesOrdenados;
+      let filtrados = [...cuponesGlobal];
 
-      if (filtro === 'usado') {
-        filtrados = cuponesOrdenados.filter(c => c.utilizado);
-      } else if (filtro === 'no-usado') {
-        filtrados = cuponesOrdenados.filter(c => !c.utilizado);
-      } else if (filtro === 'todos') {
-        // Mostrar primero los disponibles, luego los usados
-        const disponibles = cuponesOrdenados.filter(c => !c.utilizado);
-        const usados = cuponesOrdenados.filter(c => c.utilizado);
+      // Aplicar filtro de estado
+      if (filtroEstado === 'usado') {
+        filtrados = filtrados.filter(c => c.utilizado);
+      } else if (filtroEstado === 'no-usado') {
+        filtrados = filtrados.filter(c => !c.utilizado);
+      } else {
+        const disponibles = filtrados.filter(c => !c.utilizado);
+        const usados = filtrados.filter(c => c.utilizado);
         filtrados = [...disponibles, ...usados];
       }
 
+      // Aplicar filtro por comercio
+      if (comercioSeleccionado) {
+        filtrados = filtrados.filter(c => c.comercio.toLowerCase() === comercioSeleccionado);
+      }
+
+      // Aplicar búsqueda por texto
+      if (textoBusqueda) {
+        filtrados = filtrados.filter(c =>
+          c.comercio.toLowerCase().includes(textoBusqueda) ||
+          c.titulo.toLowerCase().includes(textoBusqueda)
+        );
+      }
+
       if (filtrados.length === 0) {
-        contenedor.innerHTML = "<p>No tienes cupones en esta categoría.</p>";
+        contenedor.innerHTML = "<p>No tienes cupones que coincidan con los filtros.</p>";
         return;
       }
 
@@ -167,6 +207,60 @@
       });
     }
 
+
+    async function eliminarCupon(cuponUsuarioId) {
+      const token = localStorage.getItem("token");
+
+      const confirmacion = await Swal.fire({
+        title: '¿Eliminar cupón?',
+        text: "Este cupón ya no se podrá recuperar.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      });
+
+      if (!confirmacion.isConfirmed) return;
+
+      try {
+        const res = await fetch(`${API}/api/cupon-usuario/${cuponUsuarioId}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: "Bearer " + token
+          }
+        });
+
+        const text = await res.text();
+        console.log("Respuesta cruda:", text);
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          console.error("❌ Respuesta no es JSON válido:", e);
+          await Swal.fire('Error', 'Respuesta inesperada del servidor', 'error');
+          return;
+        }
+
+        if (res.ok) {
+          await Swal.fire('Eliminado', 'El cupón fue eliminado correctamente.', 'success');
+          cargarCupones();
+        } else {
+          await Swal.fire('Error', data.error || 'No se pudo eliminar el cupón.', 'error');
+        }
+
+      } catch (err) {
+        console.error("❌ Error al eliminar cupón:", err);
+        await Swal.fire('Error', 'Error de red al eliminar el cupón.', 'error');
+      }
+    }
+
+
+
+
+
     // Inactividad de 3 minutos
     let inactividadTimer;
     function resetInactividad() {
@@ -180,7 +274,27 @@
     ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(evt => document.addEventListener(evt, resetInactividad));
     resetInactividad();
 
-    cargarCupones();
+    async function cargarCupones() {
+      const payload = verificarTokenValido();
+      if (!payload || payload.tipo !== "cliente") return;
+      document.getElementById("usuarioNombre").textContent = payload.nombre;
+
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API}/api/mis-cupones`, {
+        headers: { Authorization: "Bearer " + token }
+      });
+
+      const data = await res.json();
+      cuponesGlobal = data;
+
+      // 🔽 Llenar el select de comercios únicos
+      const comerciosUnicos = [...new Set(cuponesGlobal.map(c => c.comercio))];
+      const select = document.getElementById("filtroComercio");
+      select.innerHTML = `<option value="">-- Todos --</option>` + 
+        comerciosUnicos.map(nombre => `<option value="${nombre}">${nombre}</option>`).join('');
+
+      filtrar(filtroEstado);
+    }
   </script>
 </body>
 </html>

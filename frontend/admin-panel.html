@@ -51,6 +51,7 @@
       font-size: 14px;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <header class="header">
@@ -292,11 +293,11 @@
         const data = JSON.parse(respuestaCruda);
   
         if (res.ok) {
-          alert("✅ Cupón creado correctamente");
+          await Swal.fire('Éxito', 'Cupón creado correctamente', 'success');
           document.getElementById("formCrearCupon").reset();
           cargarCuponesAdmin();
         } else {
-          alert("❌ " + (data.error || "Error al crear cupón"));
+          await Swal.fire('Error', data.error || 'Error al crear cupón', 'error');
         }
   
       } catch (err) {
@@ -497,28 +498,38 @@
     }
   
   
-    async function habilitarCupon(id) {
-      if (!confirm("¿Habilitar nuevamente este cupón como disponible?")) return;
-  
-      try {
-        const res = await fetch(`${API}/api/admin/habilitar-cupon/${id}`, {
-          method: "POST",
-          headers: { Authorization: "Bearer " + token }
-        });
-  
-        const data = await res.json();
-  
-        if (res.ok) {
-          alert("✅ Cupón habilitado correctamente.");
-          cargarReporte(); // Recarga los datos del reporte
-        } else {
-          alert("⚠️ " + (data.error || "Error al habilitar cupón."));
-        }
-      } catch (err) {
-        alert("⛔ Error de conexión con el servidor.");
-        console.error(err);
-      }
+async function habilitarCupon(id) {
+  const confirmacion = await Swal.fire({
+    title: '¿Habilitar cupón?',
+    text: 'Este cupón volverá a estar disponible para el cliente.',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, habilitar',
+    cancelButtonText: 'Cancelar'
+  });
+
+  if (!confirmacion.isConfirmed) return;
+
+  try {
+    const res = await fetch(`${API}/api/admin/habilitar-cupon/${id}`, {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token }
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      await Swal.fire('Habilitado', 'El cupón ha sido habilitado nuevamente.', 'success');
+      cargarReporte();
+    } else {
+      await Swal.fire('Error', data.error || 'No se pudo habilitar el cupón.', 'error');
     }
+  } catch (err) {
+    console.error("⛔ Error de red:", err);
+    await Swal.fire('Error', 'Error de conexión con el servidor.', 'error');
+  }
+}
+
   
     async function marcarUtilizado(id) {
       try {
@@ -687,8 +698,18 @@
         });
     }
   
-    function eliminarCupon(id) {
-      if (!confirm("¿Eliminar este cupón permanentemente?")) return;
+    async function eliminarCupon(id) {
+      const confirmacion = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Este cupón se eliminará permanentemente.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      });
+      if (!confirmacion.isConfirmed) return;
   
       fetch(`${API}/api/admin/cupones/${id}`, {
         method: "DELETE",
@@ -738,7 +759,7 @@
   
       const data = await res.json();
       if (res.ok) {
-        alert("✅ Grupo creado correctamente");
+        await Swal.fire('¡Éxito!', 'Grupo creado correctamente', 'success');
         document.getElementById("formCrearGrupo").reset();
         cargarGrupos();
       } else {
@@ -803,7 +824,7 @@
   
       } catch (err) {
         console.error("Error al cargar grupos:", err);
-        alert("Error al cargar grupos");
+        await Swal.fire('Error', 'No se pudo cargar la información del servidor.', 'error');
       }
     }
   
@@ -878,58 +899,59 @@
   }
   
   function habilitarEdicionGrupo(id) {
-  const row = document.querySelector(`#tabla-grupos-admin tr[data-id='${id}']`);
-  row.querySelectorAll("span").forEach(el => el.style.display = "none");
-  row.querySelectorAll(".edit-input").forEach(el => el.style.display = "inline-block");
-  row.querySelector(".guardar-grupo-btn").style.display = "inline-block";
-  row.querySelector(".cancelar-grupo-btn").style.display = "inline-block";
-  }
-  
-  function cancelarEdicionGrupo(id) {
-    cargarGrupos(); // simplemente recarga
-  }
-  
-  function guardarEdicionGrupo(id) {
-  const row = document.querySelector(`#tabla-grupos-admin tr[data-id='${id}']`);
-  const inputs = row.querySelectorAll(".edit-input");
-    
-  const nuevaDescripcion = inputs[0].value.trim();
-  const nuevoPrecio = parseFloat(inputs[1].value);
-  const nuevaFechaInicio = inputs[2].value;
-  const nuevaFechaFin = inputs[3].value;
-  
-  if (!nuevaDescripcion || isNaN(nuevoPrecio) || !nuevaFechaInicio || !nuevaFechaFin) {
-    alert("Todos los campos son obligatorios.");
-    return;
-  }
-  
-  fetch(`${API}/api/admin/grupos/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + token
-    },
-    body: JSON.stringify({
-      descripcion: nuevaDescripcion,
-      precio: nuevoPrecio,
-      fecha_inicio: nuevaFechaInicio,
-      fecha_fin: nuevaFechaFin
-    })
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.message) {
-        alert("✅ Grupo actualizado correctamente");
-        cargarGrupos();
-      } else {
-        alert(data.error || "Error al actualizar grupo");
+      const row = document.querySelector(`#tabla-grupos-admin tr[data-id='${id}']`);
+      row.querySelectorAll("span").forEach(el => el.style.display = "none");
+      row.querySelectorAll(".edit-input").forEach(el => el.style.display = "inline-block");
+      row.querySelector(".guardar-grupo-btn").style.display = "inline-block";
+      row.querySelector(".cancelar-grupo-btn").style.display = "inline-block";
       }
-    })
-    .catch(err => {
-      console.error("Error al actualizar grupo:", err);
-      alert("⛔ Error de conexión");
-    });
-  }
+      
+      function cancelarEdicionGrupo(id) {
+        cargarGrupos(); // simplemente recarga
+      }
+      
+      async function guardarEdicionGrupo(id) {
+      const row = document.querySelector(`#tabla-grupos-admin tr[data-id='${id}']`);
+      const inputs = row.querySelectorAll(".edit-input");
+
+      const nuevaDescripcion = inputs[0].value.trim();
+      const nuevoPrecio = parseFloat(inputs[1].value);
+      const nuevaFechaInicio = inputs[2].value;
+      const nuevaFechaFin = inputs[3].value;
+
+      if (!nuevaDescripcion || isNaN(nuevoPrecio) || !nuevaFechaInicio || !nuevaFechaFin) {
+        await Swal.fire('Campos incompletos', 'Todos los campos son obligatorios.', 'warning');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API}/api/admin/grupos/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          },
+          body: JSON.stringify({
+            descripcion: nuevaDescripcion,
+            precio: nuevoPrecio,
+            fecha_inicio: nuevaFechaInicio,
+            fecha_fin: nuevaFechaFin
+          })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          await Swal.fire('Guardado', 'Grupo actualizado correctamente.', 'success');
+          cargarGrupos();
+        } else {
+          await Swal.fire('Error', data.error || 'No se pudo actualizar el grupo.', 'error');
+        }
+      } catch (err) {
+        console.error("Error al actualizar grupo:", err);
+        await Swal.fire('Error', '⛔ Error de conexión con el servidor.', 'error');
+      }
+    }
   
   
   

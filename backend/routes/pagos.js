@@ -89,7 +89,8 @@ router.get('/paypal/capturar-orden', async (req, res) => {
         [insertCupones]
       );
 
-      return res.redirect('http://127.0.0.1:5500/frontend/pago-exitoso.html');
+      return res.redirect(`http://127.0.0.1:5500/frontend/pago-exitoso.html?grupo=${encodeURIComponent(grupo.nombre)}`);
+
     }
 
     return res.status(400).json({ error: 'No se pudo capturar la orden' });
@@ -99,5 +100,48 @@ router.get('/paypal/capturar-orden', async (req, res) => {
     res.status(500).json({ error: 'Error al capturar orden' });
   }
 });
+
+// Asignar cupones al usuario después de un pago exitoso
+router.post('/asignar-cupones', verificarToken, async (req, res) => {
+  const usuarioId = req.user.id;
+  const { grupoNombre } = req.body;
+
+  if (!grupoNombre) {
+    return res.status(400).json({ error: 'Nombre del grupo no proporcionado' });
+  }
+
+  try {
+    const [grupos] = await pool.query('SELECT id FROM grupos WHERE nombre = ?', [grupoNombre]);
+    const grupo = grupos[0];
+
+    if (!grupo) {
+      return res.status(404).json({ error: 'Grupo no encontrado' });
+    }
+
+    const [cupones] = await pool.query('SELECT id FROM cupones WHERE grupo_id = ?', [grupo.id]);
+
+    if (!cupones.length) {
+      return res.status(404).json({ error: 'No hay cupones en este grupo' });
+    }
+
+    // Genera 6 entradas por cada cupón
+    const insertCupones = cupones.flatMap(c => {
+      if (!c.id) return [];
+      return Array(6).fill([usuarioId, c.id, new Date()]);
+    });
+
+    await pool.query(
+      'INSERT INTO cupones_usuarios (usuario_id, cupon_id, fecha_compra) VALUES ?',
+      [insertCupones]
+    );
+
+    res.json({ mensaje: 'Cupones asignados correctamente' });
+
+  } catch (err) {
+    console.error('❌ Error al asignar cupones:', err);
+    res.status(500).json({ error: 'Error del servidor al asignar cupones' });
+  }
+});
+
 
 module.exports = router;

@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <title>Pago exitoso</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    /* Fuente personalizada para SweetAlert2 */
+    .swal2-popup {
+      font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+    }
+    </style>
 </head>
 <body>
   <h1>¡Gracias por tu compra!</h1>
@@ -10,40 +17,65 @@
 
   <script src="js/api.js"></script>
   <script>
-    async function asignarCupones() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const grupoNombre = urlParams.get('grupo');
-      const token = localStorage.getItem("token");
+async function asignarCupones() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const grupoNombre = urlParams.get('grupo');
+  const token = localStorage.getItem("token");
 
-      if (!token || !grupoNombre) {
-        document.body.innerHTML = "<h2>Error: sesión no válida o grupo no especificado.</h2>";
-        return;
-      }
+  if (!token || !grupoNombre) {
+    document.body.innerHTML = "<h2>Error: sesión no válida o grupo no especificado.</h2>";
+    return;
+  }
 
-      try {
-        const res = await fetch(`${API}/api/asignar-cupones`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token
-          },
-          body: JSON.stringify({ grupoNombre })
-        });
+  try {
+    const res = await fetch(`${API}/api/asignar-cupones`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token
+      },
+      body: JSON.stringify({ grupoNombre })
+    });
 
-        const data = await res.json();
-        if (res.ok) {
-          document.body.innerHTML = "<h2>✅ Cupones asignados correctamente</h2>";
-        } else {
-          document.body.innerHTML = `<h2>⚠️ ${data.error || 'Error al asignar cupones'}</h2>`;
-        }
+    // Validar antes de parsear
+    const text = await res.text();
+    console.log("Respuesta cruda:", text);
 
-      } catch (err) {
-        console.error("❌ Error al asignar cupones:", err);
-        document.body.innerHTML = "<h2>⛔ Error de red al asignar cupones</h2>";
-      }
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error("❌ La respuesta no es JSON válido:", e);
+      document.body.innerHTML = `<h2>⛔ Error inesperado: ${text}</h2>`;
+      return;
     }
 
-    asignarCupones();
+    // ✅ Mostrar el resultado al usuario
+    if (res.ok) {
+      document.body.innerHTML = ""; // ✅ Esto quita el texto plano de fondo
+
+      await Swal.fire({
+        title: '¡Cupones asignados!',
+        text: 'Redirigiéndote a tu panel en 5 segundos...',
+        icon: 'success',
+        showConfirmButton: false,
+        timer: 5000,
+        timerProgressBar: true
+      });
+
+      localStorage.setItem("mostrarMensajeCompra", "true");
+      window.location.href = "cliente-panel.html";
+    } else {
+      document.body.innerHTML = `<h2>⚠️ ${data.error || 'Error al asignar cupones'}</h2>`;
+    }
+
+  } catch (err) {
+    console.error("❌ Error al asignar cupones:", err);
+    document.body.innerHTML = "<h2>⛔ Error de red al asignar cupones</h2>";
+  }
+}
+
+asignarCupones();
   </script>
 </body>
 </html>

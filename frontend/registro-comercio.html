@@ -44,7 +44,7 @@
     <button type="submit">Registrarme</button>
   </form>
   <script>
-    const API = window.location.hostname.includes("localhost")
+    const API = window.location.hostname.includes("localhost") || window.location.hostname.includes("127.0.0.1")
       ? "http://localhost:3000"
       : "https://api.miapp.com";
     const form = document.getElementById("registroForm");
