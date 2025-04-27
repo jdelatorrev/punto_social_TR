@@ -7,8 +7,9 @@
   <title>Punto Social | ADMIN</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    body { font-family: Arial; background: #f4f4f4;}
+    body { font-family: 'Montserrat', sans-serif; background: #f4f4f4;}
     header {
       background: #343a40; color: white; padding: 10px 20px;
       display: flex; justify-content: space-between; align-items: center;
@@ -50,10 +51,173 @@
       padding: 3px;
       font-size: 14px;
     }
+
+    .habilitar-btn:hover {
+    background-color: #0056b3;
+  }
+
+  #paginacion {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  #paginacion button {
+    padding: 8px 16px;
+    margin: 0 5px;
+    font-size: 14px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  #paginacion button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+
+  #pagina-actual {
+    font-size: 14px;
+    margin: 0 10px;
+  }
+  .sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 220px;
+  height: 100%;
+  background: #000; /* Negro elegante */
+  color: white;
+  padding-top: 20px;
+  font-family: Montserrat, sans-serif;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+  z-index: 1000;
+}
+
+
+.sidebar h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 18px;
+  color: #e0e0e0;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+}
+
+.sidebar ul li {
+  padding: 12px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+  font-size: 15px;
+}
+
+.sidebar ul li i {
+  margin-right: 36px; /* más separación */
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.8;
+  color: #e0e0e0;
+}
+
+.sidebar ul li:hover {
+  background: #1a1a1a; /* Gris muy oscuro */
+}
+body {
+  margin-left: 220px; /* espacio para el sidebar */
+  background: #f4f4f9;
+  font-family: 'Montserrat', sans-serif;
+}
+.sidebar ul li.active {
+  background: #383854;
+  font-weight: bold;
+}
+
+.asignar-cupones-container {
+  background: #fff; /* Fondo claro para el formulario */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Sombra más sutil */
+  color: #333;
+  margin: 40px auto;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.asignar-cupones-container h2 {
+  color: #222;
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.asignar-cupones-container label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #444;
+}
+
+
+.asignar-cupones-container select,
+.asignar-cupones-container input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff; /* Fondo claro */
+  color: #333;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.asignar-cupones-container select:focus,
+.asignar-cupones-container input:focus {
+  outline: none;
+  border-color: #888;
+}
+
+.asignar-cupones-container button {
+  width: 100%;
+  padding: 12px;
+  background: rgba(55, 55, 161,0.9);
+  border: none;
+  color: white;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.asignar-cupones-container button:hover {
+  background: rgb(55, 55, 161);
+}
+
+    
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+  <div class="sidebar">
+    <h2>Admin Panel</h2>
+    <ul>
+      <li onclick="mostrarSeccion('reporte')"><i data-lucide="bar-chart-3"></i> Reportes</li>
+      <li onclick="mostrarSeccion('vendedores')"><i data-lucide="briefcase"></i> Vendedores</li>
+      <li onclick="mostrarSeccion('clientes')"><i data-lucide="users"></i> Clientes</li>
+      <li onclick="mostrarSeccion('asignar')"><i data-lucide="wallet"></i> Asignar Cupones</li>
+      <li onclick="mostrarSeccion('grupos')"><i data-lucide="folder"></i> Grupos</li>
+      <li onclick="mostrarSeccion('cupones')"><i data-lucide="ticket"></i> Cupones</li>
+    </ul>
+  </div>
   <header class="header">
     <div class="container-m head">
         <a  href="/frontend/index.html"><img src="/frontend/img/logo.PNG"></a>
@@ -89,20 +253,28 @@
         <input type="text" id="busqueda" placeholder="Cliente o cupón..." oninput="filtrarCupones()" />
       </label>
     </div>
+    <div id="paginacion">
+      <button id="anterior" onclick="cambiarPagina(-1)">Anterior</button>
+      <span id="pagina-actual">1</span>
+      <button id="siguiente" onclick="cambiarPagina(1)">Siguiente</button>
+    </div>
+    
     <table id="tabla-reporte">
       <thead>
         <tr>
           <th>Cliente</th>
-          <th>Cupón</th>
+          <th>Cupon</th>
           <th>Comercio</th>
           <th>Descuento</th>
-          <th>Usado</th>
-          <th>Fecha de compra</th>
+          <th>Estado</th>
+          <th>Fecha Compra</th>
           <th>Teléfono</th>
           <th>Vendedor</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody>
+        <!-- Se llenará dinámicamente -->
+      </tbody>
     </table>
   </section>
   <section style="margin-top: 40px;">
@@ -146,13 +318,40 @@
       <tbody></tbody>
     </table>
   </section>
+  <section class="asignar-cupones-container">
+    <h2>Asignar Cupones por Pago en Efectivo</h2>
+    <form id="formAsignarCupones" onsubmit="asignarCuponesManual(event)">
+      <label>Cliente: 
+        <select id="clienteSelect" required>
+          <option value="">-- Selecciona un cliente --</option>
+        </select>
+      </label>
+  
+      <label>Grupo de Cupones: 
+        <select id="grupoManualSelect" required>
+          <option value="">-- Selecciona un grupo --</option>
+        </select>
+      </label>
+  
+      <label>Vendedor: 
+        <select id="vendedorManualSelect" required>
+          <option value="">-- Selecciona un vendedor --</option>
+        </select>
+      </label>
+  
+      <label>Monto Pagado: 
+        <input type="number" step="0.01" id="montoPagado" required />
+      </label>
+      
+      <button type="submit">Asignar Cupones</button>
+    </form>
+  </section>
   <section style="margin-top: 40px;">
     <h2>Grupos de Cupones</h2>
     <form id="formCrearGrupo" onsubmit="crearGrupo(event)" style="margin-bottom: 20px;">
       <label>Nombre del grupo: <input type="text" id="grupo_nombre" required /></label><br><br>
       <label>Descripción: <input type="text" id="grupo_descripcion" /></label><br><br>
       <label>Precio: <input type="number" step="0.01" id="grupo_precio" required /></label><br><br>
-      <label>Fecha de inicio: <input type="date" id="grupo_fecha_inicio" required /></label><br><br>
       <label>Fecha de fin: <input type="date" id="grupo_fecha_fin" required /></label><br><br>  
       <button type="submit">Crear Grupo</button>
     </form>
@@ -164,7 +363,6 @@
           <th>Nombre</th>
           <th>Descripción</th>
           <th>Precio</th>
-          <th>Fecha Inicio</th>
           <th>Fecha Fin</th>
           <th>Acciones</th>
         </tr>
@@ -192,7 +390,6 @@
           <th>Título</th>
           <th>Descripción</th>
           <th>Descuento</th>
-          <th>Fecha Inicio</th>
           <th>Expira</th>
           <th>Comercio</th>
           <th>Grupo</th>
@@ -203,7 +400,7 @@
       <tbody></tbody>
     </table>
   </section>
-  <div id="contenedor-cupones-por-grupo" class="cuponesadmin"></div>
+  <div id="contenedor-cupones-por-grupo" class="cuponesadmin" style="display:none;"></div>
 
   <button id="cerrar" onclick="cerrarSesion()">Cerrar sesión</button>
 
@@ -224,9 +421,10 @@
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         if (payload.exp < Math.floor(Date.now() / 1000)) {
-          alert("Sesión expirada");
-          localStorage.removeItem("token");
-          window.location.href = "ingresa.html";
+          Swal.fire('Sesión expirada', 'Por favor inicia sesión de nuevo.', 'warning').then(() => {
+            localStorage.removeItem("token");
+            window.location.href = "ingresa.html";
+          });
         }
         document.getElementById("usuarioNombre").textContent = payload.nombre;
         return payload;
@@ -257,10 +455,10 @@
       e.preventDefault();
   
       const grupo_id = document.getElementById("grupoSelect").value;
-        if (!grupo_id) {
-          alert("Por favor selecciona un grupo para el cupón.");
-          return;
-        }
+      if (!grupo_id) {
+        await Swal.fire('Grupo requerido', 'Por favor selecciona un grupo para el cupón.', 'warning');
+        return;
+      }
   
       const datos = {
         titulo: document.getElementById("titulo").value,
@@ -302,7 +500,7 @@
   
       } catch (err) {
         console.error("⛔ Error de conexión o parseo:", err);
-        alert("Error de conexión o respuesta inválida.");
+        await Swal.fire('Error', 'Error de conexión o respuesta inválida.', 'error');
       }
     }
   
@@ -332,8 +530,10 @@
               <td><span>${c.titulo}</span><input type="text" class="edit-input" style="display:none" value="${c.titulo}" /></td>
               <td><span>${c.descripcion || ''}</span><input type="text" class="edit-input" style="display:none" value="${c.descripcion || ''}" /></td>
               <td><span>${c.descuento}</span><input type="text" class="edit-input" style="display:none" value="${c.descuento}" /></td>
-              <td>${formatearFecha(grupo.fecha_inicio)}</td>
-              <td>${formatearFecha(grupo.fecha_fin)}</td>
+              <td>
+                <span>${formatearFecha(c.fecha_expiracion)}</span>
+                <input type="date" class="edit-input fecha-expiracion-edit" style="display:none" value="${c.fecha_expiracion?.split('T')[0] || ''}" />
+              </td>
               <td>
                 <span>${c.comercio}</span>
                 <select class="edit-input" style="display:none">
@@ -361,11 +561,11 @@
                 <button onclick="eliminarCupon(${c.id})">🗑 Eliminar</button>
               </td>
             `;
-  
             tbody.appendChild(tr);
           });
         });
     }
+
   
   
     function habilitarEdicion(id) {
@@ -383,6 +583,8 @@
       row.querySelector(".guardar-btn").style.display = "none";
       row.querySelector(".cancelar-btn").style.display = "none";
     }
+
+    
   
     function guardarEdicion(id) {
       const row = document.querySelector(`tr[data-id='${id}']`);
@@ -391,13 +593,20 @@
       const titulo = inputs[0].value.trim();
       const descripcion = inputs[1].value.trim();
       const descuento = inputs[2].value.trim();
-      const fecha_expiracion = inputs[3].value;
+      const fecha_expiracion = row.querySelector(".fecha-expiracion-edit").value.trim();
       const comercio_id = inputs[4].value;
       const grupo_id = row.querySelector(".grupo-edit").value;
       const grupo_descripcion = row.querySelector(".grupo-descripcion-edit").value;
   
       if (!titulo || !descripcion || !descuento || !fecha_expiracion || !comercio_id || !grupo_id) {
-        alert("Todos los campos son obligatorios.");
+        Swal.fire('Campos incompletos', 'Todos los campos son obligatorios.', 'warning');
+        return;
+      }
+
+      // Validar formato de fecha
+      const regexFecha = /^\d{4}-\d{2}-\d{2}$/;
+      if (!regexFecha.test(fecha_expiracion)) {
+        Swal.fire('Formato inválido', 'La fecha debe ser YYYY-MM-DD.', 'warning');
         return;
       }
   
@@ -433,15 +642,15 @@
               });
             }
   
-            alert("✅ Cupón actualizado correctamente");
+            await Swal.fire('Guardado', 'Cupón actualizado correctamente', 'success');
             cargarCuponesAdmin();
           } else {
-            alert("❌ " + (data.error || "Error al actualizar"));
+            await Swal.fire('Error', data.error || 'No se pudo actualizar el cupón.', 'error');
           }
         })
         .catch(err => {
           console.error(err);
-          alert("⛔ Error de conexión");
+          Swal.fire('Error', '⛔ Error de conexión con el servidor.', 'error');
         });
     }
   
@@ -459,44 +668,69 @@
       });
     }
   
-    function renderTabla(data) {
-      const tbody = document.querySelector("#tabla-reporte tbody");
-      tbody.innerHTML = "";
-  
-      data.forEach(row => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${row.cliente}</td>
-          <td>${row.cupon}</td>
-          <td>${row.comercio}</td>
-          <td>${row.descuento}</td>
-          <td>
-            ${row.utilizado 
-              ? `✅ <button class="habilitar-btn" onclick="habilitarCupon(${row.id})">Habilitar</button>` 
-              : `❌ <button class="habilitar-btn" onclick="marcarUtilizado(${row.id})">Marcar como usado</button>`}
-          </td>
-          <td>${formatearFecha(row.fecha_compra)}</td>
-          <td>
-            <input type="text" value="${row.telefono || ''}" 
-              onchange="actualizarTelefonoCliente('${row.cliente}', '${row.telefono}', this.value)" />
-          </td>
-          <td>
-            <select onchange="asignarVendedorCliente('${row.cliente}', this.value)">
-              <option value="">-- Ninguno --</option>
-              ${vendedoresGlobal
-                .filter(v => v.activo) // 👈 solo activos
-                .map(v => `
-                  <option value="${v.id}" ${v.nombre === row.vendedor ? 'selected' : ''}>
-                    ${v.nombre}
-                  </option>
-                `).join('')}
-            </select>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-  
+    let paginaActualGeneral = 1;
+      const elementosPorPagina = 15;
+      let datosGlobales = []; // Guardamos aquí todos los datos
+
+      function renderTablaPaginada(data) {
+        datosGlobales = data;
+        const tbody = document.querySelector("#tabla-reporte tbody");
+        tbody.innerHTML = "";
+
+        const inicio = (paginaActualGeneral - 1) * elementosPorPagina;
+        const fin = inicio + elementosPorPagina;
+        const paginaDatos = datosGlobales.slice(inicio, fin);
+
+        paginaDatos.forEach(row => {
+          console.log("🧩 Vendedor del cliente:", row.cliente, "ID:", row.vendedor_id, "Nombre:", row.vendedor);
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${row.cliente}</td>
+            <td>${row.cupon}</td>
+            <td>${row.comercio}</td>
+            <td>${row.descuento}</td>
+            <td>
+              ${row.utilizado 
+                ? `✅ <button class="habilitar-btn" onclick="habilitarCupon(${row.id})">Habilitar</button>` 
+                : `❌ <button class="habilitar-btn" onclick="marcarUtilizado(${row.id})">Marcar como usado</button>`}
+            </td>
+            <td>${formatearFecha(row.fecha_compra)}</td>
+            <td>
+              <input type="text" value="${row.telefono || ''}" 
+                onchange="actualizarTelefonoCliente('${row.cliente}', '${row.telefono}', this.value)" />
+            </td>
+            <td>
+              <select id="vendedorSelect-${row.id}" disabled>
+                <option value="">-- Ninguno --</option>
+                ${vendedoresGlobal
+                  .filter(v => v.activo)
+                  .map(v => `
+                    <option value="${v.id}" ${v.id === row.vendedor_id ? 'selected' : ''}>
+                      ${v.nombre}
+                    </option>
+                  `).join('')}
+              </select>
+              <button onclick="editarVendedor(${row.id})">✏️</button>
+              <button style="display:none;" id="guardarVendedorBtn-${row.id}" onclick="guardarVendedor(${row.id}, '${row.cliente}')">💾</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        actualizarControlesPaginacion();
+      }
+
+
+
+      function actualizarControlesPaginacion() {
+        const totalPaginas = Math.ceil(datosGlobales.length / elementosPorPagina);
+        document.getElementById("pagina-actual").textContent = `Página ${paginaActualGeneral} de ${totalPaginas}`;
+        document.getElementById("anterior").disabled = paginaActualGeneral === 1;
+        document.getElementById("siguiente").disabled = paginaActualGeneral === totalPaginas;
+      }
+
+      // Llama esta función con tus datos iniciales
+      // renderTablaPaginada(tusDatos);  
   
 async function habilitarCupon(id) {
   const confirmacion = await Swal.fire({
@@ -549,15 +783,14 @@ async function habilitarCupon(id) {
   
         const data = JSON.parse(textoPlano);
         if (res.ok) {
-          alert("✅ Cupón marcado como utilizado");
+          await Swal.fire('Marcado', 'Cupón marcado como utilizado.', 'success');
           cargarReporte();
         } else {
-          alert("⚠️ " + (data.error || "Error al marcar cupón"));
+          await Swal.fire('Error', data.error || 'Error al marcar cupón.', 'error');
         }
   
       } catch (err) {
-        console.error("⛔ Error al marcar como utilizado:", err);
-        alert("⛔ Error al marcar como utilizado: " + err);
+        await Swal.fire('Error', '⛔ Error al marcar como utilizado.', 'error');
       }
     }
   
@@ -590,22 +823,23 @@ async function habilitarCupon(id) {
         const res = await fetch(`${API}/api/admin/reporte-cupones`, {
           headers: { Authorization: "Bearer " + token }
         });
-  
+
         if (!res.ok) throw new Error("Error de servidor");
-  
+
         const data = await res.json();
         datosReporte = data;
+        console.log("🔎 Datos del reporte:", datosReporte);  // ← AQUÍ
         cargarFiltroComercios(data);
-        renderTabla(data);
+        renderTablaPaginada(data);
       } catch (error) {
         console.error("Error al cargar el reporte:", error);
-        alert("Error al cargar los datos del servidor.");
+        Swal.fire('Error', 'Error al cargar los datos del servidor.', 'error');
       }
     }
   
     function exportarExcel() {
       if (!datosReporte.length) {
-        alert("No hay datos para exportar.");
+        Swal.fire('Sin datos', 'No hay datos para exportar.', 'info');
         return;
       }
   
@@ -630,8 +864,11 @@ async function habilitarCupon(id) {
         cargarGrupos().then(() => {
           cargarVendedoresGlobal().then(() => {
             mostrarVendedoresTabla();
+            cargarVendedoresSelector();
             cargarCuponesAdmin();
             cargarReporte();
+            cargarClientes(); // 👈 Agregar esto
+            cargarVendedoresParaManual(); // 👈 Y esto
           });
         });
       });
@@ -651,52 +888,78 @@ async function habilitarCupon(id) {
         const data = await res.json();
         datosReporte = data;
         cargarFiltroComercios(data);
-        renderTabla(data);
+        renderTablaPaginada(data);
       } catch (error) {
         console.error("Error al cargar el reporte:", error);
-        alert("Error al cargar los datos del servidor.");
+        Swal.fire('Error', 'Error al cargar los datos del servidor.', 'error');
       }
     }
   
   
-    function editarCupon(id) {
-      const cupon = datosReporte.find(c => c.id === id) || {}; // fallback
-      const nuevoTitulo = prompt("Nuevo título:", cupon.titulo);
-      const nuevaDescripcion = prompt("Nueva descripción:", cupon.descripcion || "");
-      const nuevoDescuento = prompt("Nuevo descuento:", cupon.descuento);
-      const nuevaFecha = prompt("Nueva fecha (YYYY-MM-DD):", cupon.fecha_expiracion?.split("T")[0]);
-  
-      if (!nuevoTitulo || !nuevaDescripcion || !nuevoDescuento || !nuevaFecha) {
-        return alert("Todos los campos son obligatorios.");
-      }
-  
-      fetch(`${API}/api/admin/cupones/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token
-        },
-        body: JSON.stringify({
-          titulo: nuevoTitulo,
-          descripcion: nuevaDescripcion,
-          descuento: nuevoDescuento,
-          fecha_expiracion: nuevaFecha
-        })
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.message) {
-            alert("✅ Cupón actualizado");
-            cargarCuponesAdmin();
-          } else {
-            alert("❌ " + (data.error || "Error al actualizar"));
+    async function editarCupon(id) {
+      const cupon = datosReporte.find(c => c.id === id) || {};
+
+      const { value: formValues } = await Swal.fire({
+        title: 'Editar Cupón',
+        html:
+          `<input id="swal-input1" class="swal2-input" placeholder="Título" value="${cupon.titulo}">
+          <input id="swal-input2" class="swal2-input" placeholder="Descripción" value="${cupon.descripcion || ''}">
+          <input id="swal-input3" class="swal2-input" placeholder="Descuento" value="${cupon.descuento}">
+          <input id="swal-input4" type="date" class="swal2-input" value="${cupon.fecha_expiracion?.split("T")[0] || ''}">`,
+        focusConfirm: false,
+        preConfirm: () => {
+          const fechaValida = document.getElementById('swal-input4').value.trim();
+          if (!fechaValida.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            Swal.showValidationMessage('La fecha debe tener formato YYYY-MM-DD');
+            return false;
           }
-        })
-        .catch(err => {
-          console.error(err);
-          alert("Error de conexión.");
+          return [
+            document.getElementById('swal-input1').value.trim(),
+            document.getElementById('swal-input2').value.trim(),
+            document.getElementById('swal-input3').value.trim(),
+            fechaValida
+          ];
+        }
+      });
+
+      if (!formValues) return; // Cancelado
+
+      const [nuevoTitulo, nuevaDescripcion, nuevoDescuento, nuevaFecha] = formValues;
+
+      if (!nuevoTitulo || !nuevaDescripcion || !nuevoDescuento || !nuevaFecha) {
+        return Swal.fire('Campos incompletos', 'Todos los campos son obligatorios.', 'warning');
+      }
+
+      try {
+        const res = await fetch(`${API}/api/admin/cupones/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          },
+          body: JSON.stringify({
+            titulo: nuevoTitulo,
+            descripcion: nuevaDescripcion,
+            descuento: nuevoDescuento,
+            fecha_expiracion: nuevaFecha
+          })
         });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          await Swal.fire('Actualizado', '✅ Cupón actualizado correctamente.', 'success');
+          cargarCuponesAdmin();
+        } else {
+          await Swal.fire('Error', data.error || 'No se pudo actualizar el cupón.', 'error');
+        }
+
+      } catch (err) {
+        console.error(err);
+        await Swal.fire('Error', 'Error de conexión.', 'error');
+      }
     }
+
   
     async function eliminarCupon(id) {
       const confirmacion = await Swal.fire({
@@ -720,15 +983,15 @@ async function habilitarCupon(id) {
         .then(res => res.json())
         .then(data => {
           if (data.message) {
-            alert("🗑️ Cupón eliminado");
+            Swal.fire('Eliminado', '🗑️ Cupón eliminado', 'success');
             cargarCuponesAdmin();
           } else {
-            alert("❌ " + (data.error || "Error al eliminar"));
+            Swal.fire('Error', data.error || 'No se pudo eliminar el cupón.', 'error');
           }
         })
         .catch(err => {
           console.error(err);
-          alert("Error de conexión.");
+          Swal.fire('Error', 'Error de conexión.', 'error');
         });
     }
   
@@ -740,11 +1003,10 @@ async function habilitarCupon(id) {
     const nombre = document.getElementById("grupo_nombre").value.trim();
     const descripcion = document.getElementById("grupo_descripcion").value.trim();
     const precio = parseFloat(document.getElementById("grupo_precio").value);
-    const fecha_inicio = document.getElementById("grupo_fecha_inicio").value;
     const fecha_fin = document.getElementById("grupo_fecha_fin").value;
   
-    if (!nombre || isNaN(precio) || !fecha_inicio || !fecha_fin) {
-      return alert("Todos los campos son obligatorios.");
+    if (!nombre || isNaN(precio) || !fecha_fin) {
+      return Swal.fire('Campos incompletos', 'Todos los campos son obligatorios.', 'warning');
     }
   
     try {
@@ -763,96 +1025,28 @@ async function habilitarCupon(id) {
         document.getElementById("formCrearGrupo").reset();
         cargarGrupos();
       } else {
-        alert(data.error || "Error al crear grupo");
+        await Swal.fire('Error', data.error || "Error al crear grupo", 'error');
       }
     } catch (err) {
       console.error("Error al crear grupo:", err);
-      alert("Error de conexión");
+      Swal.fire('Error', 'Error de conexión.', 'error');
     }
   }
-  
-  async function cargarGrupos() {
-      try {
-        const res = await fetch(`${API}/api/admin/grupos`, {
-          headers: { Authorization: "Bearer " + token }
-        });
-  
-        listaGrupos = await res.json();
-  
-        const tbody = document.querySelector("#tabla-grupos-admin tbody");
-        tbody.innerHTML = "";
-  
-        listaGrupos.forEach(grupo => {
-          const tr = document.createElement("tr");
-          tr.setAttribute("data-id", grupo.id);
-  
-          tr.innerHTML = `
-            <td>${grupo.nombre}</td>
-            <td>
-              <span>${grupo.descripcion}</span>
-              <input type="text" class="edit-input" style="display:none" value="${grupo.descripcion || ''}" />
-            </td>
-            <td>
-              <span>$${parseFloat(grupo.precio).toFixed(2)}</span>
-              <input type="number" step="0.01" class="edit-input" style="display:none" value="${grupo.precio}" />
-            </td>
-            <td>
-              <span>${formatearFecha(grupo.fecha_inicio)}</span>
-              <input type="date" class="edit-input" style="display:none" value="${grupo.fecha_inicio || ''}" />
-            </td>
-            <td>
-              <span>${formatearFecha(grupo.fecha_fin)}</span>
-              <input type="date" class="edit-input" style="display:none" value="${grupo.fecha_fin || ''}" />
-            </td>
-            <td>
-              <button onclick="habilitarEdicionGrupo(${grupo.id})">✏️ Editar</button>
-              <button class="guardar-grupo-btn" style="display:none" onclick="guardarEdicionGrupo(${grupo.id})">💾 Guardar</button>
-              <button class="cancelar-grupo-btn" style="display:none" onclick="cancelarEdicionGrupo(${grupo.id})">❌ Cancelar</button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-  
-        const grupoSelect = document.getElementById("grupoSelect");
-        grupoSelect.innerHTML = `<option value="">-- Selecciona un grupo --</option>`;
-        listaGrupos.forEach(g => {
-          const option = document.createElement("option");
-          option.value = g.id;
-          option.textContent = g.nombre;
-          grupoSelect.appendChild(option);
-        });
-  
-      } catch (err) {
-        console.error("Error al cargar grupos:", err);
-        await Swal.fire('Error', 'No se pudo cargar la información del servidor.', 'error');
-      }
-    }
-  
-    function formatearFecha(fechaISO) {
-      if (!fechaISO) return '-';
-      const fecha = new Date(fechaISO);
-      const dia = String(fecha.getDate()).padStart(2, '0');
-      const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-      const año = fecha.getFullYear();
-      return `${dia}-${mes}-${año}`;
-    }
-  
-  
+
   async function cargarGrupos() {
     try {
       const res = await fetch(`${API}/api/admin/grupos`, {
         headers: { Authorization: "Bearer " + token }
       });
-  
+
       listaGrupos = await res.json();
-  
-      // Rellenar tabla
+
       const tbody = document.querySelector("#tabla-grupos-admin tbody");
       tbody.innerHTML = "";
-  
+
       listaGrupos.forEach(grupo => {
         const tr = document.createElement("tr");
-        tr.setAttribute("data-id", grupo.id); // 👈 esto es lo que faltaba
+        tr.setAttribute("data-id", grupo.id);
         tr.innerHTML = `
           <td>${grupo.nombre}</td>
           <td>
@@ -863,8 +1057,10 @@ async function habilitarCupon(id) {
             <span>$${parseFloat(grupo.precio).toFixed(2)}</span>
             <input type="number" step="0.01" class="edit-input" style="display:none" value="${grupo.precio}" />
           </td>
-          <td>${grupo.fecha_inicio || '-'}</td>
-          <td>${grupo.fecha_fin || '-'}</td>
+          <td>
+            <span>${formatearFecha(grupo.fecha_fin)}</span>
+            <input type="date" class="edit-input fecha-fin-edit" style="display:none" value="${grupo.fecha_fin || ''}" />
+          </td>
           <td>
             <button onclick="habilitarEdicionGrupo(${grupo.id})">✏️ Editar</button>
             <button class="guardar-grupo-btn" style="display:none" onclick="guardarEdicionGrupo(${grupo.id})">💾 Guardar</button>
@@ -873,16 +1069,7 @@ async function habilitarCupon(id) {
         `;
         tbody.appendChild(tr);
       });
-  
-      function formatearFecha(fechaISO) {
-        if (!fechaISO) return '-';
-        const fecha = new Date(fechaISO);
-        const dia = String(fecha.getDate()).padStart(2, '0');
-        const mes = String(fecha.getMonth() + 1).padStart(2, '0'); // +1 porque enero es 0
-        const año = fecha.getFullYear();
-        return `${dia}-${mes}-${año}`;
-      }
-      // También actualizar el <select> de creación de cupones
+
       const grupoSelect = document.getElementById("grupoSelect");
       grupoSelect.innerHTML = `<option value="">-- Selecciona un grupo --</option>`;
       listaGrupos.forEach(g => {
@@ -891,19 +1078,29 @@ async function habilitarCupon(id) {
         option.textContent = g.nombre;
         grupoSelect.appendChild(option);
       });
-  
+
+      const grupoManualSelect = document.getElementById("grupoManualSelect");
+      grupoManualSelect.innerHTML = `<option value="">-- Selecciona un grupo --</option>`;
+      listaGrupos.forEach(g => {
+        const option = document.createElement("option");
+        option.value = g.id;
+        option.textContent = g.nombre;
+        grupoManualSelect.appendChild(option);
+      });
+
     } catch (err) {
       console.error("Error al cargar grupos:", err);
-      alert("Error al cargar grupos");
+      await Swal.fire('Error', 'No se pudo cargar la información del servidor.', 'error');
     }
   }
+
   
   function habilitarEdicionGrupo(id) {
-      const row = document.querySelector(`#tabla-grupos-admin tr[data-id='${id}']`);
-      row.querySelectorAll("span").forEach(el => el.style.display = "none");
-      row.querySelectorAll(".edit-input").forEach(el => el.style.display = "inline-block");
-      row.querySelector(".guardar-grupo-btn").style.display = "inline-block";
-      row.querySelector(".cancelar-grupo-btn").style.display = "inline-block";
+          const row = document.querySelector(`#tabla-grupos-admin tr[data-id='${id}']`);
+        row.querySelectorAll("span").forEach(el => el.style.display = "none");
+        row.querySelectorAll(".edit-input").forEach(el => el.style.display = "inline-block");
+        row.querySelector(".guardar-grupo-btn").style.display = "inline-block";
+        row.querySelector(".cancelar-grupo-btn").style.display = "inline-block";
       }
       
       function cancelarEdicionGrupo(id) {
@@ -911,49 +1108,46 @@ async function habilitarCupon(id) {
       }
       
       async function guardarEdicionGrupo(id) {
-      const row = document.querySelector(`#tabla-grupos-admin tr[data-id='${id}']`);
-      const inputs = row.querySelectorAll(".edit-input");
+        const row = document.querySelector(`#tabla-grupos-admin tr[data-id='${id}']`);
+        const inputs = row.querySelectorAll(".edit-input");
 
-      const nuevaDescripcion = inputs[0].value.trim();
-      const nuevoPrecio = parseFloat(inputs[1].value);
-      const nuevaFechaInicio = inputs[2].value;
-      const nuevaFechaFin = inputs[3].value;
+        const nuevaDescripcion = inputs[0].value.trim();
+        const nuevoPrecio = parseFloat(inputs[1].value);
+        const nuevaFechaFin = row.querySelector(".fecha-fin-edit").value.trim();
 
-      if (!nuevaDescripcion || isNaN(nuevoPrecio) || !nuevaFechaInicio || !nuevaFechaFin) {
-        await Swal.fire('Campos incompletos', 'Todos los campos son obligatorios.', 'warning');
-        return;
-      }
-
-      try {
-        const res = await fetch(`${API}/api/admin/grupos/${id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token
-          },
-          body: JSON.stringify({
-            descripcion: nuevaDescripcion,
-            precio: nuevoPrecio,
-            fecha_inicio: nuevaFechaInicio,
-            fecha_fin: nuevaFechaFin
-          })
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-          await Swal.fire('Guardado', 'Grupo actualizado correctamente.', 'success');
-          cargarGrupos();
-        } else {
-          await Swal.fire('Error', data.error || 'No se pudo actualizar el grupo.', 'error');
+        if (!nuevaDescripcion || isNaN(nuevoPrecio) || !nuevaFechaFin) {
+          await Swal.fire('Campos incompletos', 'Todos los campos son obligatorios.', 'warning');
+          return;
         }
-      } catch (err) {
-        console.error("Error al actualizar grupo:", err);
-        await Swal.fire('Error', '⛔ Error de conexión con el servidor.', 'error');
+
+        try {
+          const res = await fetch(`${API}/api/admin/grupos/${id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token
+            },
+            body: JSON.stringify({
+              descripcion: nuevaDescripcion,
+              precio: nuevoPrecio,
+              fecha_fin: nuevaFechaFin
+            })
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            await Swal.fire('Guardado', 'Grupo actualizado correctamente.', 'success');
+            cargarGrupos();
+          } else {
+            await Swal.fire('Error', data.error || 'No se pudo actualizar el grupo.', 'error');
+          }
+        } catch (err) {
+          console.error("Error al actualizar grupo:", err);
+          await Swal.fire('Error', '⛔ Error de conexión con el servidor.', 'error');
+        }
       }
-    }
-  
-  
+
   
   async function cargarCuponesAgrupados() {
     try {
@@ -979,7 +1173,7 @@ async function habilitarCupon(id) {
       renderizarCuponesAgrupados();
     } catch (err) {
       console.error("Error al cargar cupones:", err);
-      alert("Error al cargar cupones agrupados");
+      await Swal.fire('Error', 'Error al cargar cupones agrupados', 'error');
     }
   }
   
@@ -1031,14 +1225,14 @@ async function habilitarCupon(id) {
     });
   }
   
-  function cambiarPagina(grupoId, delta) {
-    const total = Math.ceil(cuponesPorGrupo[grupoId].cupones.length / 20);
-    paginaActual[grupoId] += delta;
-  
-    if (paginaActual[grupoId] < 1) paginaActual[grupoId] = 1;
-    if (paginaActual[grupoId] > total) paginaActual[grupoId] = total;
-  
-    renderizarCuponesAgrupados();
+  function cambiarPagina(direccion) {
+    const totalPaginas = Math.ceil(datosGlobales.length / elementosPorPagina);
+    paginaActualGeneral += direccion;
+
+    if (paginaActualGeneral < 1) paginaActualGeneral = 1;
+    if (paginaActualGeneral > totalPaginas) paginaActualGeneral = totalPaginas;
+
+    renderTablaPaginada(datosGlobales);
   }
   
   // Inicializar
@@ -1070,7 +1264,7 @@ async function habilitarCupon(id) {
     });
   } catch (err) {
     console.error("Error al cargar vendedores:", err);
-    alert("Error al cargar vendedores");
+    await Swal.fire('Error', 'Error al cargar vendedores', 'error');
   }
   }
   
@@ -1095,25 +1289,89 @@ async function habilitarCupon(id) {
     // 🔍 Revisa que sea JSON válido antes de intentar leerlo
     if (!contentType || !contentType.includes("application/json")) {
       const textoPlano = await res.text();
-      throw new Error("Respuesta no válida del servidor:\n" + textoPlano);
+      throw new Error(await Swal.fire('Error', 'Respuesta no válida del servidor:\n' + textoPlano, 'error'));
     }
   
     const data = await res.json();
   
     if (res.ok) {
-      alert("✅ Vendedor agregado");
+      await Swal.fire('Éxito', '✅ Vendedor agregado', 'success');
       document.getElementById("formCrearVendedor").reset();
       cargarVendedoresAdmin();
     } else {
-      alert(data.error || "Error al crear vendedor");
+      await Swal.fire('Error', data.error || 'Error al crear vendedor', 'error');
     }
   } catch (err) {
     console.error("Error al crear vendedor:", err);
-    alert("Error al crear vendedor: " + err.message);
+    await Swal.fire('Error', 'No se pudo crear el vendedor.\n' + err.message, 'error');
   }
   }
   
-  
+  async function cargarClientes() {
+    const res = await fetch(`${API}/api/admin/usuarios`, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    const usuarios = await res.json();
+    const clientes = usuarios.filter(u => u.tipo === "cliente");
+
+    const clienteSelect = document.getElementById("clienteSelect");
+    clienteSelect.innerHTML = `<option value="">-- Selecciona un cliente --</option>`;
+    clientes.forEach(c => {
+      const option = document.createElement("option");
+      option.value = c.id;
+      option.textContent = c.nombre + " - " + c.email;
+      clienteSelect.appendChild(option);
+    });
+  }
+
+  async function cargarVendedoresParaManual() {
+    const vendedorSelect = document.getElementById("vendedorManualSelect");
+    vendedorSelect.innerHTML = `<option value="">-- Selecciona un vendedor --</option>`;
+    vendedoresGlobal.forEach(v => {
+      const option = document.createElement("option");
+      option.value = v.id;
+      option.textContent = v.nombre;
+      vendedorSelect.appendChild(option);
+    });
+  }
+
+  async function asignarCuponesManual(e) {
+    e.preventDefault();
+
+    const cliente_id = document.getElementById("clienteSelect").value;
+    const grupo_id = document.getElementById("grupoManualSelect").value;
+    const vendedor_id = document.getElementById("vendedorManualSelect").value;
+    const monto = parseFloat(document.getElementById("montoPagado").value);
+
+    if (!cliente_id || !grupo_id || !vendedor_id || isNaN(monto)) {
+      await Swal.fire('Campos incompletos', 'Todos los campos son obligatorios.', 'warning');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/api/admin/asignar-cupones-manual`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        },
+        body: JSON.stringify({ cliente_id, grupo_id, vendedor_id, monto })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        await Swal.fire('Éxito', 'Cupones asignados correctamente', 'success');
+        document.getElementById("formAsignarCupones").reset();
+      } else {
+        await Swal.fire('Error', data.error || 'No se pudieron asignar los cupones.', 'error');
+      }
+    } catch (err) {
+      console.error("Error al asignar cupones manualmente:", err);
+      await Swal.fire('Error', 'Error de conexión.', 'error');
+    }
+  }
+
+
   async function cambiarEstadoVendedor(id, estado) {
   try {
     const res = await fetch(`${API}/api/admin/vendedores/${id}/estado`, {
@@ -1127,14 +1385,14 @@ async function habilitarCupon(id) {
   
     const data = await res.json();
     if (res.ok) {
-      alert("✅ Estado actualizado");
+      await Swal.fire('Actualizado', '✅ Estado actualizado correctamente.', 'success');
       cargarVendedoresAdmin();
     } else {
-      alert(data.error || "Error al cambiar estado");
+      await Swal.fire('Error', data.error || 'No se pudo cambiar el estado.', 'error');
     }
   } catch (err) {
     console.error("Error:", err);
-    alert("Error de conexión");
+    Swal.fire('Error', 'Error de conexión.', 'error');
   }
   }
   
@@ -1151,7 +1409,7 @@ async function habilitarCupon(id) {
   
     if (!res.ok) {
       const data = await res.json();
-      alert(data.error || "Error al actualizar");
+      await Swal.fire('Error', data.error || 'No se pudo actualizar el campo.', 'error');
     }
   } catch (err) {
     console.error("Error al actualizar campo:", err);
@@ -1159,22 +1417,30 @@ async function habilitarCupon(id) {
   }
   
   async function verClientesDelVendedor() {
-  const vendedorId = document.getElementById("vendedorSelector").value;
-  if (!vendedorId) return;
-  
-  const res = await fetch(`${API}/api/admin/vendedores/${vendedorId}/clientes`, {
-    headers: { Authorization: "Bearer " + token }
-  });
-  
-  const clientes = await res.json();
-  const tbody = document.querySelector("#tabla-clientes-vendedor tbody");
-  tbody.innerHTML = "";
-  
-  clientes.forEach(c => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${c.nombre}</td><td>${c.email}</td><td>${c.telefono}</td>`;
-    tbody.appendChild(tr);
-  });
+    const vendedorId = document.getElementById("vendedorSelector").value;
+    if (!vendedorId) return;
+
+    try {
+      const res = await fetch(`${API}/api/admin/vendedores/${vendedorId}/clientes`, {
+        headers: { Authorization: "Bearer " + token }
+      });
+
+      if (!res.ok) throw new Error("Error al obtener clientes");
+
+      const clientes = await res.json();
+      const tbody = document.querySelector("#tabla-clientes-vendedor tbody");
+      tbody.innerHTML = "";
+
+      clientes.forEach(c => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${c.nombre}</td><td>${c.email}</td><td>${c.telefono}</td>`;
+        tbody.appendChild(tr);
+      });
+
+    } catch (err) {
+      console.error("❌ Error al cargar clientes del vendedor:", err);
+      await Swal.fire('Error', 'No se pudieron cargar los clientes del vendedor.', 'error');
+    }
   }
   
   let vendedoresGlobal = [];
@@ -1188,6 +1454,17 @@ async function habilitarCupon(id) {
   } catch (err) {
     console.error("Error al cargar vendedores (global):", err);
   }
+  }
+
+  async function cargarVendedoresSelector() {
+    const vendedorSelector = document.getElementById("vendedorSelector");
+    vendedorSelector.innerHTML = `<option value="">-- Elegir --</option>`;
+    vendedoresGlobal.forEach(v => {
+      const option = document.createElement("option");
+      option.value = v.id;
+      option.textContent = v.nombre;
+      vendedorSelector.appendChild(option);
+    });
   }
   
   async function mostrarVendedoresTabla() {
@@ -1216,7 +1493,7 @@ async function habilitarCupon(id) {
     });
   } catch (err) {
     console.error("Error al mostrar vendedores:", err);
-    alert("Error al mostrar vendedores");
+    await Swal.fire('Error', 'No se pudo mostrar la tabla de vendedores.', 'error');
   }
   }
   
@@ -1236,10 +1513,10 @@ async function habilitarCupon(id) {
   
     const data = await res.json();
     if (res.ok) {
-      alert("✅ Vendedor asignado");
+      await Swal.fire('Asignado', '✅ Vendedor asignado correctamente.', 'success');
       cargarReporte();
     } else {
-      alert("❌ " + (data.error || "Error al asignar vendedor"));
+      await Swal.fire('Error', data.error || 'No se pudo asignar el vendedor.', 'error');
     }
   } catch (err) {
     console.error("Error al asignar vendedor:", err);
@@ -1264,14 +1541,136 @@ async function habilitarCupon(id) {
   
     const data = await res.json();
     if (res.ok) {
-      alert("📱 Teléfono actualizado");
+      await Swal.fire('Actualizado', '📱 Teléfono del cliente actualizado.', 'success');
     } else {
-      alert(data.error || "Error al actualizar teléfono");
+      await Swal.fire('Error', data.error || 'No se pudo actualizar el teléfono.', 'error');
     }
   } catch (err) {
     console.error("Error al actualizar teléfono:", err);
   }
   }
+
+  function mostrarSeccion(seccion) {
+    // Oculta todas las secciones
+    document.querySelectorAll('section').forEach(sec => sec.style.display = 'none');
+
+    // Muestra solo la sección elegida
+    const secciones = {
+      'reporte': 0,
+      'vendedores': 1,
+      'clientes': 2,
+      'asignar': 3,
+      'grupos': 4,
+      'cupones': 5
+    };
+
+    const index = secciones[seccion];
+    if (typeof index !== 'undefined') {
+      document.querySelectorAll('section')[index].style.display = 'block';
+    }
+
+    function mostrarSeccion(id) {
+      document.querySelectorAll('section, #contenedor-cupones-por-grupo').forEach(el => el.style.display = 'none');
+
+      const seccion = document.getElementById(id);
+      if (seccion) seccion.style.display = 'block';
+
+      // Mostrar el contenedor solo si está en la pestaña de cupones
+      if (id === 'seccion-cupones') {
+        document.getElementById('contenedor-cupones-por-grupo').style.display = 'block';
+      }
+    }
+
+    // Cambia estilos del sidebar activo
+    document.querySelectorAll('.sidebar ul li').forEach(li => li.classList.remove('active'));
+    document.querySelector(`.sidebar ul li:nth-child(${index + 1})`).classList.add('active');
+  }
+
+  // Muestra la primera sección al cargar
+  document.addEventListener("DOMContentLoaded", () => {
+    lucide.createIcons();
+    mostrarSeccion('reporte');
+  });
+
+  function editarVendedor(id) {
+      document.getElementById(`vendedorSelect-${id}`).disabled = false;
+      document.getElementById(`guardarVendedorBtn-${id}`).style.display = 'inline-block';
+    }
+
+    async function guardarVendedor(id, nombreCliente) {
+      const vendedor_id = document.getElementById(`vendedorSelect-${id}`).value;
+
+      if (!vendedor_id) {
+        Swal.fire('Falta seleccionar', 'Debes seleccionar un vendedor.', 'warning');
+        return;
+      }
+
+      try {
+        const cliente = datosReporte.find(c => c.id === id && c.cliente === nombreCliente);
+        console.log("🧩 Cliente buscado en datosReporte:", cliente);
+        console.log("📝 Cliente ID:", cliente ? cliente.cliente_id : null, "Nombre:", nombreCliente);
+        console.log("📝 Vendedor seleccionado ID:", vendedor_id);
+
+        if (!cliente) {
+          Swal.fire('Error', 'Cliente no encontrado.', 'error');
+          return;
+        }
+
+        const res = await fetch(`${API}/api/admin/clientes/${cliente.cliente_id}/vendedor`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          },
+          body: JSON.stringify({ vendedor_id })
+        });
+
+        const respuestaCruda = await res.text();
+        console.log("📦 Respuesta cruda del backend (guardar vendedor):", respuestaCruda);
+
+        let data;
+        try {
+          data = JSON.parse(respuestaCruda);
+        } catch (e) {
+          console.error("❌ Error de parseo JSON:", e, respuestaCruda);
+          Swal.fire('Error', 'Respuesta no válida del servidor:\n' + respuestaCruda, 'error');
+          return;
+        }
+
+        if (res.ok) {
+          await Swal.fire('Guardado', 'Vendedor asignado correctamente.', 'success');
+          document.getElementById(`vendedorSelect-${id}`).disabled = true;
+          document.getElementById(`guardarVendedorBtn-${id}`).style.display = 'none';
+          await cargarReporte();
+
+          async function cargarReporte() {
+            try {
+              const res = await fetch(`${API}/api/admin/reporte-cupones`, {
+                headers: { Authorization: "Bearer " + token }
+              });
+
+              if (!res.ok) throw new Error("Error de servidor");
+
+              const data = await res.json();
+              console.log("📊 Datos del reporte después de asignar vendedor:", data);  // 👈 verifica aquí
+
+              datosReporte = data;
+              cargarFiltroComercios(data);
+              renderTablaPaginada(data);
+            } catch (error) {
+              console.error("Error al cargar el reporte:", error);
+              Swal.fire('Error', 'Error al cargar los datos del servidor.', 'error');
+            }
+          }
+        } else {
+          Swal.fire('Error', data.error || 'No se pudo asignar el vendedor.', 'error');
+        }
+      } catch (err) {
+        console.error("Error al asignar vendedor:", err);
+        Swal.fire('Error', '⛔ Error de conexión.', 'error');
+      }
+    }
+
   </script>
   
 </body>

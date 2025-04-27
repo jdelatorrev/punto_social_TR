@@ -6,7 +6,7 @@ const verificarToken = require('../middleware/verificarToken');
 
 // Middleware para restringir solo a admins
 function soloAdmin(req, res, next) {
-  if (req.user.tipo !== 'admin') {
+  if (!req.user || req.user.tipo !== 'admin') {
     return res.status(403).json({ error: 'Acceso denegado' });
   }
   next();
@@ -107,17 +107,25 @@ router.put('/cupones/:id', verificarToken, soloAdmin, async (req, res) => {
 });
 
 // 🔹 Eliminar cupón
-router.delete('/cupones/:id', verificarToken, soloAdmin, async (req, res) => {
+router.delete("/cupones/:id", verificarToken, soloAdmin, async (req, res) => {
   const { id } = req.params;
+
   try {
-    const [resultado] = await pool.query(`DELETE FROM cupones WHERE id = ?`, [id]);
+    // 🔥 Primero eliminar las relaciones en cupones_usuarios
+    await pool.query("DELETE FROM cupones_usuarios WHERE cupon_id = ?", [id]);
+
+    // 🗑 Luego eliminar el cupón
+    const [resultado] = await pool.query("DELETE FROM cupones WHERE id = ?", [id]);
+
     if (resultado.affectedRows === 0) {
-      return res.status(404).json({ error: 'Cupón no encontrado' });
+      return res.status(404).json({ error: "Cupón no encontrado." });
     }
-    res.json({ message: 'Cupón eliminado' });
-  } catch (err) {
-    console.error('Error al eliminar cupón:', err);
-    res.status(500).json({ error: 'Error al eliminar' });
+
+    res.json({ message: "Cupón eliminado correctamente." });
+
+  } catch (error) {
+    console.error("Error al eliminar cupón:", error);
+    res.status(500).json({ error: "Error interno del servidor al eliminar cupón." });
   }
 });
 
@@ -164,22 +172,24 @@ router.post('/habilitar-cupon/:id', verificarToken, soloAdmin, async (req, res) 
 router.get('/reporte-cupones', verificarToken, soloAdmin, async (req, res) => {
   try {
     const [reporte] = await pool.query(`
-    SELECT 
-      cupones_usuarios.id,
-      cupones.titulo AS cupon,
-      cupones.descripcion,
-      cupones.descuento,
-      cupones_usuarios.utilizado,
-      cupones_usuarios.fecha_compra,
-      clientes.nombre AS cliente,
-      clientes.telefono,
-      v.nombre AS vendedor,
-      comercios.nombre AS comercio
-    FROM cupones_usuarios
-    JOIN cupones ON cupones_usuarios.cupon_id = cupones.id
-    JOIN usuarios AS clientes ON cupones_usuarios.usuario_id = clientes.id
-    JOIN usuarios AS comercios ON cupones.comercio_id = comercios.id
-    LEFT JOIN vendedores v ON clientes.vendedor_id = v.id
+      SELECT 
+        cupones_usuarios.id,
+        cupones.titulo AS cupon,
+        cupones.descripcion,
+        cupones.descuento,
+        cupones_usuarios.utilizado,
+        cupones_usuarios.fecha_compra,
+        clientes.id AS cliente_id,
+        clientes.nombre AS cliente,
+        clientes.telefono,
+        clientes.vendedor_id,  -- Asegúrate de traer esto bien
+        v.nombre AS vendedor,
+        comercios.nombre AS comercio
+      FROM cupones_usuarios
+      JOIN cupones ON cupones_usuarios.cupon_id = cupones.id
+      JOIN usuarios AS clientes ON cupones_usuarios.usuario_id = clientes.id
+      JOIN usuarios AS comercios ON cupones.comercio_id = comercios.id
+      LEFT JOIN vendedores v ON clientes.vendedor_id = v.id
     `);
     res.json(reporte);
   } catch (err) {
@@ -187,6 +197,7 @@ router.get('/reporte-cupones', verificarToken, soloAdmin, async (req, res) => {
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
+
 
 // 🔄 Actualizar descripción de grupo
 router.put('/grupos/:id', verificarToken, soloAdmin, async (req, res) => {
@@ -297,6 +308,58 @@ router.get('/vendedores/:id/clientes', verificarToken, soloAdmin, async (req, re
     res.status(500).json({ error: "Error al obtener clientes del vendedor" });
   }
 });
+
+router.post("/asignar-cupones-manual", async (req, res) => {
+  const { cliente_id, grupo_id, vendedor_id, monto } = req.body;
+
+  try {
+    // 1. Obtener cupones disponibles del grupo
+    const [cupones] = await pool.query("SELECT id FROM cupones WHERE grupo_id = ?", [grupo_id]);
+
+    // 2. Asignar los cupones al cliente
+    for (let cupon of cupones) {
+      await pool.query("INSERT INTO cupones_usuarios (cupon_id, usuario_id, utilizado) VALUES (?, ?, 0)", [cupon.id, cliente_id]);
+    }
+
+    // 3. Registrar la orden de pago en efectivo (opcional)
+    await pool.query(
+      "INSERT INTO ordenes (usuario_id, grupo_id, vendedor_id, monto, tipo_pago) VALUES (?, ?, ?, ?, 'efectivo')",
+      [cliente_id, grupo_id, vendedor_id, monto]
+    );
+
+    res.json({ message: "Cupones asignados exitosamente" });
+  } catch (err) {
+    console.error("Error asignando cupones manual:", err);
+    res.status(500).json({ error: "Error del servidor" });
+  }
+});
+
+// 🔹 Asignar vendedor a un cliente
+router.put('/clientes/:id/vendedor', verificarToken, soloAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { vendedor_id } = req.body;
+
+  if (!vendedor_id) {
+    return res.status(400).json({ error: 'Vendedor requerido' });
+  }
+
+  try {
+    await pool.query("UPDATE usuarios SET vendedor_id = ? WHERE id = ?", [vendedor_id, id]);
+
+    // 🚨 Aquí obtenemos los datos actualizados y los regresamos
+    const [rows] = await pool.query("SELECT id, nombre, vendedor_id FROM usuarios WHERE id = ?", [id]);
+    console.log("🔍 Resultado de rows:", rows);
+    const clienteActualizado = rows[0];
+    console.log("📝 Cliente actualizado:", clienteActualizado);
+    console.log("🔍 ID recibido en backend:", id);
+    res.json({ message: "Vendedor asignado correctamente", cliente: clienteActualizado });
+
+  } catch (err) {
+    console.error("❌ Error al asignar vendedor:", err);
+    res.status(500).json({ error: "Error al asignar vendedor" });
+  }
+});
+
 
 
 module.exports = router;
