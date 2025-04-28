@@ -92,7 +92,7 @@
   background: #000; /* Negro elegante */
   color: white;
   padding-top: 20px;
-  font-family: Montserrat, sans-serif;
+  font-family: 'Montserrat', sans-serif;
   box-shadow: 2px 0 5px rgba(0,0,0,0.3);
   z-index: 1000;
 }
@@ -202,6 +202,165 @@ body {
   background: rgb(55, 55, 161);
 }
 
+button {
+    background: #3737a1; /* Azul elegante */
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  button:hover {
+    background: #2c2c82; /* Más oscuro al pasar */
+    transform: translateY(-1px);
+  }
+
+  button:disabled {
+    background: #999;
+    cursor: not-allowed;
+  }
+
+  /* Estilo especial para botones pequeños como editar, eliminar */
+  button.icon-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    margin-right: 5px;
+    border-radius: 4px;
+  }
+
+  /* Botón de cerrar sesión */
+  #cerrar {
+    background: #111;
+    font-weight: bold;
+    margin-top: 40px;
+  }
+
+  #cerrar:hover {
+    background: #333;
+  }
+
+  /* Botones específicos en paginación */
+  #paginacion button {
+    background: #3737a1;
+  }
+
+  #paginacion button:hover {
+    background: #2c2c82;
+  }
+
+  /* Estilo para botones de acción (editar, guardar, cancelar) */
+  .guardar-btn, .cancelar-btn, .guardar-grupo-btn, .cancelar-grupo-btn {
+    margin-top: 5px;
+  }
+
+  /* Extra: Botones de habilitar */
+  .habilitar-btn {
+    background: #ffc107;
+    color: #333;
+  }
+
+  .habilitar-btn:hover {
+    background: #e0a800;
+  }
+
+    /* 🔹 Tablas estilizadas */
+    table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    font-size: 14px;
+  }
+
+  th {
+    background-color: #3737a1;
+    color: white;
+    font-weight: 600;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  tr:hover {
+    background-color: #f1f1f1;
+  }
+
+  /* 🔹 Inputs y selects */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    font-family: 'Montserrat', sans-serif;
+    background: #fff;
+    color: #333;
+    transition: border 0.3s, box-shadow 0.3s;
+  }
+
+  input:focus,
+  select:focus {
+    border-color: #3737a1;
+    box-shadow: 0 0 5px rgba(55, 55, 161, 0.4);
+    outline: none;
+  }
+
+  /* 🔹 Etiquetas */
+  label {
+    font-weight: 500;
+    color: #444;
+    margin-bottom: 5px;
+    display: block;
+    font-size: 14px;
+  }
+
+  /* 🔹 Secciones */
+  section {
+    background: white;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 960px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-left: 5px solid #3737a1;
+    border-radius: 6px;
+  }
+
+  section h2, section h3 {
+    color: #333;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  /* 🔹 Select personalizado */
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='gray' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position-x: 100%;
+    background-position-y: 50%;
+    background-size: 16px;
+  }
     
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -240,7 +399,7 @@ body {
           <option value="no_usados">No usados</option>
         </select>
       </label>
-      <label style="margin-left: 20px;">
+      <label>
         Comercio:
         <select id="filtroComercio" onchange="filtrarCupones()">
           <option value="todos">Todos</option>
@@ -1552,7 +1711,7 @@ async function habilitarCupon(id) {
 
   function mostrarSeccion(seccion) {
     // Oculta todas las secciones
-    document.querySelectorAll('section').forEach(sec => sec.style.display = 'none');
+    document.querySelectorAll('section, #contenedor-cupones-por-grupo').forEach(el => el.style.display = 'none');
 
     // Muestra solo la sección elegida
     const secciones = {
@@ -1569,16 +1728,9 @@ async function habilitarCupon(id) {
       document.querySelectorAll('section')[index].style.display = 'block';
     }
 
-    function mostrarSeccion(id) {
-      document.querySelectorAll('section, #contenedor-cupones-por-grupo').forEach(el => el.style.display = 'none');
-
-      const seccion = document.getElementById(id);
-      if (seccion) seccion.style.display = 'block';
-
-      // Mostrar el contenedor solo si está en la pestaña de cupones
-      if (id === 'seccion-cupones') {
-        document.getElementById('contenedor-cupones-por-grupo').style.display = 'block';
-      }
+    // Mostrar el contenedor solo si está en la pestaña de cupones
+    if (seccion === 'cupones') {
+      document.getElementById('contenedor-cupones-por-grupo').style.display = 'block';
     }
 
     // Cambia estilos del sidebar activo

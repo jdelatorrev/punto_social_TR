@@ -50,22 +50,23 @@
         });
         if (!res.ok) throw new Error('Error al obtener los grupos');
         const grupos = await res.json();
-  
+        console.log("📦 Datos de grupos recibidos:", grupos);
+        grupos.forEach((g, i) => {
+          console.log(`Grupo ${i + 1}:`, g);
+        });
         console.log("📦 Datos de grupos recibidos:", grupos);
   
         grupos.forEach(grupo => {
-        const div = document.createElement('div');
-        div.className = 'grupo';
+          console.log("📆 Fecha fin cruda:", grupo.fecha_fin);
 
-        // ✅ Sacamos los comercios únicos desde los cupones
-        const comerciosUnicos = [
-          ...new Set((grupo.cupones || []).map(c => c.comercio))
-        ];
+          const div = document.createElement('div');
+          div.className = 'grupo';
 
-        const comerciosList = comerciosUnicos.length
-          ? comerciosUnicos.map(com => `<li>${com}</li>`).join('')
-          : "<li>No hay comercios asignados aún.</li>";
-  
+          // ✅ Aquí declaramos comerciosUnicos correctamente:
+          const comerciosUnicos = [
+            ...new Set((grupo.cupones || []).map(c => c.comercio))
+          ];
+
           div.innerHTML = `
             <h2>
               <img src="/frontend/img/logo.PNG" alt="Logo" style="height: 24px; vertical-align: middle; margin-right: 8px;">
@@ -74,17 +75,21 @@
             <p><strong>Incluye:</strong> 10 cupones con 6 usos cada uno</p>
             <p><em>Total: 60 Beneficios Exclusivos</em></p>
             <p><strong>Precio:</strong> $${Number(grupo.precio).toFixed(2)}</p>
-            <p><strong>Vigencia:</strong> ${grupo.vigencia 
-              ? `Del ${formatearFecha(grupo.fecha_inicio)} al ${formatearFecha(grupo.fecha_fin)}`
+            <p><strong>Vigencia:</strong> ${grupo.fecha_fin 
+              ? `Válido hasta el ${formatearFecha(grupo.fecha_fin)}`
               : "Sin definir"}
             </p>
             <p><strong>Aplica en los siguientes comercios:</strong></p>
-            <ul>${comerciosList}</ul>
+            <ul>${comerciosUnicos.length 
+              ? comerciosUnicos.map(com => `<li>${com}</li>`).join('') 
+              : "<li>No hay comercios asignados aún.</li>"}</ul>
             <button class="boton-comprar" onclick="comprarGrupo(${grupo.id})">Comprar</button>
           `;
-  
+
           contenedorGrupos.appendChild(div);
         });
+
+
   
       } catch (error) {
         console.error('Error al cargar los grupos:', error);
@@ -132,13 +137,27 @@
     }
   }
 
-    function formatearFecha(fechaISO) {
-      if (!fechaISO) return "Sin definir";
-      const fecha = new Date(fechaISO);
-      const dia = String(fecha.getDate()).padStart(2, '0');
-      const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-      const año = fecha.getFullYear();
-      return `${dia}-${mes}-${año}`;
+  function formatearFecha(fechaISO) {
+    if (!fechaISO) return "Sin definir";
+
+    const fecha = new Date(fechaISO);
+
+    if (isNaN(fecha)) {
+      // 🔥 Si no se puede convertir, mostramos directo
+      return fechaISO;
+    }
+
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const año = fecha.getFullYear();
+    return `${dia}-${mes}-${año}`;
+  }
+
+    function obtenerVigencia(grupo) {
+      if (grupo.fecha_fin) {
+        return `Hasta el ${formatearFecha(grupo.fecha_fin)}`;
+      }
+      return "Sin definir";
     }
   </script>  
 </body>
