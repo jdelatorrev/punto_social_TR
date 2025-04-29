@@ -4,6 +4,10 @@ require('dotenv').config();
 
 const app = express();
 const pool = require('./db');
+if (!pool) {
+  console.error("🚨 Error crítico: no se pudo inicializar la base de datos.");
+  process.exit(1); // Detener el proceso si no hay conexión
+}
 
 console.log("🟢 Servidor iniciado y esperando peticiones...");
 
