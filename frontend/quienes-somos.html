@@ -5,6 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Punto Social</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .respuesta {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.4s ease, padding 0.3s ease;
+          padding: 0 10px;
+          margin: 0;
+          background: #f9f9f9;
+        }
+        .respuesta.activa {
+          max-height: 300px; /* puedes ajustar si quieres más o menos expansión */
+          padding: 10px;
+          margin-top: 10px;
+        }
+        .toggle-btn {
+          background: none;
+          border: none;
+          color: #333;
+          font-size: 24px;
+          font-weight: bold;
+          cursor: pointer;
+          margin-left: 10px;
+          transition: transform 0.3s ease;
+        }
+        .toggle-btn.abierto {
+          transform: rotate(45deg);
+        }
+      </style>    
 </head>
 
 <body>
@@ -161,46 +189,44 @@
         <section class="container-m questions-list">
             <h1>¿Preguntas Frecuentes?</h1>
             <div class="questions">
-                <div class="question">
-                    <h3>01. ¿QUÉ TIPOS DE CUPONES OFRECEN?</h3>
-                    <p>Ofrecemos una amplia variedad de
-                        cupones, desde descuentos en restaurantes
-                        hasta promociones en tiendas minoristas.</p>
+              <div class="question">
+                <h3>01. ¿QUÉ TIPOS DE CUPONES OFRECEN? <button class="toggle-btn">+</button></h3>
+                <div class="respuesta">
+                  <p>Ofrecemos una amplia variedad de cupones, desde descuentos en restaurantes hasta promociones en tiendas minoristas.</p>
                 </div>
-                <div class="question">
-                    <h3>02. ¿CÓMO PUEDO EMPEZAR A USAR LOS CUPONES?</h3>
-                    <p>Simplemente regístrate en nuestra
-                        plataforma y comienza a explorar las ofertas
-                        disponibles.</p>
+              </div>
+              <div class="question">
+                <h3>02. ¿CÓMO PUEDO EMPEZAR A USAR LOS CUPONES? <button class="toggle-btn">+</button></h3>
+                <div class="respuesta">
+                  <p>Simplemente regístrate en nuestra plataforma y comienza a explorar las ofertas disponibles.</p>
                 </div>
-                <div class="question">
-                    <h3>03. ¿QUÉ BENEFICIOS OBTENGO AL UNIRME A PUNTO SOCIAL?</h3>
-                    <p>Acceso exclusivo a cupones, estrategias de
-                        marketing personalizadas y una comunidad
-                        conectada que te ayuda a ahorrar y crecer.</p>
+              </div>
+              <div class="question">
+                <h3>03. ¿QUÉ BENEFICIOS OBTENGO AL UNIRME A PUNTO SOCIAL? <button class="toggle-btn">+</button></h3>
+                <div class="respuesta">
+                  <p>Acceso exclusivo a cupones, estrategias de marketing personalizadas y una comunidad conectada que te ayuda a ahorrar y crecer.</p>
                 </div>
-                <div class="question">
-                    <h3>04. ¿QUÉ TIPO DE NEGOCIOS PUEDEN BENEFICIARSE DE UNA CAMPAÑA DE CUPONES?</h3>
-                    <p>Cualquier negocio que busque aumentar su tráfico y
-                        conversión puede beneficiarse. Restaurantes, tiendas en
-                        línea, spas, gimnasios, clínicas estéticas y servicios locales
-                        suelen tener gran éxito con estrategias de cupones.</p>
+              </div>
+              <div class="question">
+                <h3>04. ¿QUÉ TIPO DE NEGOCIOS PUEDEN BENEFICIARSE DE UNA CAMPAÑA DE CUPONES? <button class="toggle-btn">+</button></h3>
+                <div class="respuesta">
+                  <p>Cualquier negocio que busque aumentar su tráfico y conversión puede beneficiarse.</p>
                 </div>
-                <div class="question">
-                    <h3>05. ¿CÓMO SE MIDE EL ÉXITO DE UNA CAMPAÑA DE CUPONES?</h3>
-                    <p>Analizamos métricas clave como la tasa de redención, el
-                        retorno de inversión (ROI), el aumento en tráfico y la
-                        retención de clientes. Además, realizamos ajustes en tiempo
-                        real para optimizar resultados.</p>
+              </div>
+              <div class="question">
+                <h3>05. ¿CÓMO SE MIDE EL ÉXITO DE UNA CAMPAÑA DE CUPONES? <button class="toggle-btn">+</button></h3>
+                <div class="respuesta">
+                  <p>Analizamos métricas como tasa de redención, ROI, tráfico y retención de clientes.</p>
                 </div>
-                <div class="question">
-                    <h3>06.¿QUÉ PLATAFORMAS UTILIZAN PARA PROMOCIONAR LOS CUPONES?</h3>
-                    <p>Usamos redes sociales (Facebook, Instagram, TikTok),
-                        también usamos la tecnica del face 2 face para asegurar
-                        que los cupones lleguen a la audiencia correcta.</p>
+              </div>
+              <div class="question">
+                <h3>06. ¿QUÉ PLATAFORMAS UTILIZAN PARA PROMOCIONAR LOS CUPONES? <button class="toggle-btn">+</button></h3>
+                <div class="respuesta">
+                  <p>Usamos Facebook, Instagram, TikTok y técnicas presenciales (face-to-face marketing).</p>
                 </div>
+              </div>
             </div>
-        </section>
+          </section>          
         <section class="section-6 bg-black">
             <div class="container-m contact">
                 <a href="/frontend/quienes-somos.html"><img src="/frontend/img/logo-neg.PNG" alt="logo black"></a>
@@ -225,5 +251,28 @@
         <p class="copyright">Punto Social 2025©</p>
         <p class="copyright">Todos los derechos reservados.</p>
     </footer>
+    <script>
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const respuestaActual = btn.parentElement.nextElementSibling;
+            const yaEstaAbierta = respuestaActual.classList.contains('activa');
+      
+            // Cerrar todas
+            document.querySelectorAll('.respuesta').forEach(r => r.classList.remove('activa'));
+            document.querySelectorAll('.toggle-btn').forEach(b => {
+              b.textContent = '+';
+              b.classList.remove('abierto');
+            });
+      
+            // Si NO estaba abierta antes, abrir esta
+            if (!yaEstaAbierta) {
+              respuestaActual.classList.add('activa');
+              btn.textContent = '–';
+              btn.classList.add('abierto');
+            }
+            // Si ya estaba abierta, no hacemos nada más (se cierra con el paso anterior)
+          });
+        });
+      </script>
 </body>
 </html>

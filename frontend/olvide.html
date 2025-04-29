@@ -4,29 +4,33 @@
   <meta charset="UTF-8" />
   <title>Punto Social | Recuperar Contraseña</title>
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     form {
-      max-width: 400px; margin: auto; padding: 20px;
-      background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: auto;
+      padding: 20px;
+      background: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     input, button {
-      width: 100%; margin-bottom: 10px; padding: 10px;
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
       font-size: 16px;
     }
     button {
-      background: #007bff; color: white; border: none;
+      background: #007bff;
+      color: white;
+      border: none;
     }
-    button:hover { background: #0056b3; }
-    .mensaje {
-      padding: 10px;
-      background: #d4edda;
-      color: #155724;
-      margin-bottom: 10px;
-      display: none;
+    button:hover {
+      background: #0056b3;
     }
-    .error {
-      background: #f8d7da;
-      color: #721c24;
+    .join p {
+      font-size: 14px;
+      margin-top: 10px;
+      text-align: center;
     }
   </style>
 </head>
@@ -34,53 +38,45 @@
   <header class="header">
     <div class="container-m head">
       <a href="/frontend/index.html"><img src="/frontend/img/logo.PNG" /></a>
-      <nav class="nav">
-        <ul class="nav-bar">
-          <li><a href="/frontend/quienes-somos.html">Nosotros</a></li>
-          <li><a href="/frontend/servicios.html">Servicios</a></li>
-          <li><a href="/frontend/categorias.html">Categorías</a></li>
-          <li><a href="/frontend/contacto.html">Contacto</a></li>
-          <li class="log-in"><a href="/frontend/ingresa.html">Ingresa</a></li>
-          <li class="join-us"><a href="/frontend/unete.html">Únete</a></li>
-      </ul>
-      </nav>
     </div>
   </header>
+
   <main>
     <section class="container-m">
       <div class="intro">
-          <img class="logo" src="/frontend/img/logo_intro.png" alt="logo">
-          <div class="intro-quote">
-              <p>Descubre cupones exclusivos y únete a una comunidad conectada que maximiza tu ahorro gozando de un mundo de descuentos.</p>
+        <img class="logo" src="/frontend/img/logo_intro.png" alt="logo">
+        <div class="intro-quote">
+          <p>Descubre cupones exclusivos y únete a una comunidad conectada que maximiza tu ahorro gozando de un mundo de descuentos.</p>
+        </div>
+        <div class="login-header">
+          <h1>Recuperar Contraseña</h1>
+        </div>
+
+        <form id="olvideForm">
+          <input type="email" name="email" placeholder="Correo electrónico" required />
+          <button type="submit">Enviar enlace</button>
+
+          <div class="join">
+            <p>¿Aún no tienes cuenta? <a href="unete.html">Regístrate</a></p>
+            <p>¿Ya tienes cuenta? <a href="ingresa.html">Inicia sesión</a></p>
           </div>
-          <div class="login-header">
-            <h1>Recuperar Contraseña</h1>
-          </div>
-          <form id="olvideForm">
-            <div id="mensaje" class="mensaje"></div>
-            <input type="email" name="email" placeholder="Correo electrónico" required />
-            <button type="submit">Enviar enlace</button>
-            <div class="join">
-              <p>¿Aún no tienes cuenta? <a href="unete.html">Registrate</a></p>
-              <p style="text-align:center; margin-top:10px;">¿Ya tienes cuenta? <a href="ingresa.html">Inicia Sesión</a></p>
-            </div>
-          </form>
+        </form>
       </div>
     </section>
   </main>
 
-
+  <script src="js/api.js"></script>
   <script>
-    const API = window.location.hostname.includes("localhost")
-      ? "http://localhost:3000"
-      : "https://api.miapp.com";
     const form = document.getElementById("olvideForm");
-    const mensajeBox = document.getElementById("mensaje");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      mensajeBox.style.display = "none";
-      const email = form.email.value;
+      const email = form.email.value.trim();
+
+      if (!email) {
+        await Swal.fire('Campo vacío', 'Por favor ingresa un correo.', 'warning');
+        return;
+      }
 
       try {
         const res = await fetch(`${API}/api/olvide-password`, {
@@ -91,13 +87,29 @@
 
         const data = await res.json();
 
-        mensajeBox.textContent = data.message || data.error;
-        mensajeBox.className = "mensaje " + (res.ok ? "" : "error");
-        mensajeBox.style.display = "block";
+        if (res.ok) {
+          await Swal.fire({
+            icon: 'success',
+            title: '¡Correo enviado!',
+            text: 'Revisa tu correo electrónico para restablecer tu contraseña.',
+            confirmButtonColor: '#3085d6'
+          });
+          form.reset();
+        } else {
+          await Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.error || 'No se pudo enviar el enlace.',
+            confirmButtonColor: '#d33'
+          });
+        }
       } catch (err) {
-        mensajeBox.textContent = "Error de conexión";
-        mensajeBox.className = "mensaje error";
-        mensajeBox.style.display = "block";
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error de conexión',
+          text: 'No se pudo contactar al servidor.',
+          confirmButtonColor: '#d33'
+        });
       }
     });
   </script>

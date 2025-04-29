@@ -6,35 +6,51 @@
     <title>Punto Social</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        form {
-          max-width: 400px;
-          /* background: white; */
-          padding: 20px;
-          margin: auto;
-          /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
-        }
-        input, button, select {
-          width: 100%;
-          margin-bottom: 10px;
-          padding: 10px;
-          font-size: 16px;
-        }
-        button {
-          background: #17a2b8;
-          color: white;
-          border: none;
-          cursor: pointer;
-        }
-        button:hover {
-          background: #117a8b;
-        }
-        .error {
-          background: #f8d7da;
-          color: #721c24;
-          padding: 10px;
-          margin-bottom: 10px;
-          border-left: 4px solid #dc3545;
-        }
+  form {
+      max-width: 400px;
+      padding: 20px;
+      margin: auto;
+    }
+
+    input, button, select {
+      width: 100%;
+      margin-bottom: 20px;
+      padding: 10px 5px;
+      font-size: 16px;
+      border: none;
+      border-bottom: 2px solid #dc3545; /* 🔴 Línea roja abajo */
+      background: transparent;
+      color: #333;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, select:focus {
+      border-bottom: 2px solid #a71d2a; /* 🔥 Rojo más fuerte al enfocar */
+    }
+
+    button {
+      background: #000; /* 🔲 Fondo negro */
+      color: #fff; /* 🔤 Letras blancas */
+      border: none;
+      cursor: pointer;
+      padding: 12px;
+      font-size: 16px;
+      transition: background 0.3s;
+      border-bottom: none; /* No línea roja en botón */
+    }
+
+    button:hover {
+      background: #333; /* 🔳 Gris oscuro al pasar mouse */
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-left: 4px solid #dc3545;
+    }
       </style>
 </head>
 
@@ -92,7 +108,7 @@
                             <input type="text" name="message" placeholder="Mensaje" required />
                             <input type="text" name="category" placeholder="Servicio de Interés" required />
                             <button type="submit">Enviar</button>
-                          </form>
+                  </form>
             </div>
         </section>
         <section class="section-6 bg-black">
@@ -119,5 +135,58 @@
         <p class="copyright">Punto Social 2025©</p>
         <p class="copyright">Todos los derechos reservados.</p>
     </footer>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="js/api.js"></script> <!-- este ya lo usas en otras páginas -->
+<script>
+  const form = document.getElementById('registroForm');
+  const mensajeError = document.getElementById('mensajeError');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    mensajeError.style.display = 'none';
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    // Validar campos básicos si quieres aquí
+    if (!data.nombre || !data.email || !data.phone || !data.message || !data.category) {
+      mensajeError.textContent = "Todos los campos son obligatorios.";
+      mensajeError.style.display = "block";
+      return;
+    }
+
+    try {
+      // Llamada al backend para enviar correo al admin
+      const res = await fetch(`${API}/api/contacto`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const respuesta = await res.json();
+
+      if (res.ok) {
+        await Swal.fire({
+          title: '¡Mensaje enviado!',
+          text: 'Nos pondremos en contacto contigo lo antes posible.',
+          icon: 'success',
+          confirmButtonColor: '#000'
+        });
+        form.reset();
+      } else {
+        throw new Error(respuesta.error || 'Error al enviar mensaje');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      await Swal.fire({
+        title: 'Error',
+        text: error.message || 'No se pudo enviar el mensaje.',
+        icon: 'error',
+        confirmButtonColor: '#000'
+      });
+    }
+  });
+</script>
+
 </body>
 </html>

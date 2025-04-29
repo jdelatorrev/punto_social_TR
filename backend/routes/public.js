@@ -125,4 +125,38 @@ router.get('/confirmar-compra', verificarToken, async (req, res) => {
   }
 });
 
+// 📩 Ruta pública para formulario de contacto
+router.post('/contacto', async (req, res) => {
+  const { nombre, email, phone, message, category } = req.body;
+
+  if (!nombre || !email || !phone || !message || !category) {
+    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  }
+
+  try {
+    const { enviarCorreo } = require('../mailer'); // asegúrate que este archivo exista
+
+    const contenidoHTML = `
+      <h2>📩 Nuevo mensaje desde contacto</h2>
+      <p><strong>Nombre:</strong> ${nombre}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Teléfono:</strong> ${phone}</p>
+      <p><strong>Servicio de interés:</strong> ${category}</p>
+      <p><strong>Mensaje:</strong><br>${message}</p>
+    `;
+
+    await enviarCorreo(
+      'jrobertodelatorrev@gmail.com', // Cambia este correo al del administrador
+      'Nuevo mensaje de contacto desde Punto Social',
+      contenidoHTML
+    );
+
+    res.json({ message: 'Mensaje enviado correctamente' });
+  } catch (err) {
+    console.error('❌ Error al enviar correo de contacto:', err);
+    res.status(500).json({ error: 'Error al enviar mensaje' });
+  }
+});
+
+
 module.exports = router;

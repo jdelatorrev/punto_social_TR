@@ -20,28 +20,28 @@ router.get('/usuarios', verificarToken, soloAdmin, async (req, res) => {
 
 // 🔹 Obtener todos los grupos de cupones
 router.get('/grupos', verificarToken, soloAdmin, async (req, res) => {
-  const [grupos] = await pool.query('SELECT id, nombre, descripcion, precio, fecha_inicio, fecha_fin FROM grupos');
+  const [grupos] = await pool.query('SELECT id, nombre, descripcion, precio, fecha_fin FROM grupos');
   res.json(grupos);
 });
 
-// 🔹 Crear un nuevo grupo
-router.post('/grupos', verificarToken, soloAdmin, async (req, res) => {
-  const { nombre, descripcion, precio, fecha_inicio, fecha_fin } = req.body;
-  if (!nombre || isNaN(precio) || !fecha_inicio || !fecha_fin) {
-    return res.status(400).json({ error: 'Faltan datos' });
-  }
+  // 🔹 Crear un nuevo grupo
+  router.post('/grupos', verificarToken, soloAdmin, async (req, res) => {
+    const { nombre, descripcion, precio, fecha_fin } = req.body;
+    if (!nombre || isNaN(precio) || !fecha_fin) {
+      return res.status(400).json({ error: 'Faltan datos' });
+    }
 
-  try {
-    const [resultado] = await pool.query(
-      'INSERT INTO grupos (nombre, descripcion, precio, fecha_inicio, fecha_fin) VALUES (?, ?, ?, ?, ?)',
-      [nombre, descripcion || '', precio, fecha_inicio, fecha_fin]
-    );
-    res.json({ message: 'Grupo creado', id: resultado.insertId });
-  } catch (err) {
-    console.error('Error al crear grupo:', err);
-    res.status(500).json({ error: 'Error interno al crear grupo' });
-  }
-});
+    try {
+      const [resultado] = await pool.query(
+        'INSERT INTO grupos (nombre, descripcion, precio, fecha_fin) VALUES (?, ?, ?, ?)',
+        [nombre, descripcion || '', precio, fecha_fin]
+      );
+      res.json({ message: 'Grupo creado', id: resultado.insertId });
+    } catch (err) {
+      console.error('Error al crear grupo:', err);
+      res.status(500).json({ error: 'Error interno al crear grupo' });
+    }
+  });
 
 // 🔹 Obtener todos los cupones
 router.get('/cupones', verificarToken, soloAdmin, async (req, res) => {
@@ -201,7 +201,7 @@ router.get('/reporte-cupones', verificarToken, soloAdmin, async (req, res) => {
 
 // 🔄 Actualizar descripción de grupo
 router.put('/grupos/:id', verificarToken, soloAdmin, async (req, res) => {
-  const { descripcion, precio, fecha_inicio, fecha_fin } = req.body;
+  const { descripcion, precio, fecha_fin } = req.body;
   const { id } = req.params;
 
   if (!descripcion || isNaN(precio)) {
@@ -211,9 +211,9 @@ router.put('/grupos/:id', verificarToken, soloAdmin, async (req, res) => {
   try {
     await pool.query(`
       UPDATE grupos 
-      SET descripcion = ?, precio = ?, fecha_inicio = ?, fecha_fin = ?
+      SET descripcion = ?, precio = ?, fecha_fin = ?
       WHERE id = ?
-    `, [descripcion, precio, fecha_inicio, fecha_fin, id]);
+    `, [descripcion, precio, fecha_fin, id]);
     res.json({ message: "Grupo actualizado correctamente" });
   } catch (err) {
     console.error("❌ Error al actualizar grupo:", err);
@@ -359,6 +359,31 @@ router.put('/clientes/:id/vendedor', verificarToken, soloAdmin, async (req, res)
     res.status(500).json({ error: "Error al asignar vendedor" });
   }
 });
+
+  const generarCodigoUnico = () => {
+    return Math.random().toString(36).substr(2, 8).toUpperCase();
+  };
+
+  router.post('/codigos', verificarToken, soloAdmin, async (req, res) => {
+    const { grupo_id, cantidad } = req.body;
+
+    if (!grupo_id || !cantidad || isNaN(cantidad)) {
+      return res.status(400).json({ error: 'Datos inválidos' });
+    }
+
+    try {
+      const codigos = [];
+      for (let i = 0; i < cantidad; i++) {
+        const codigo = generarCodigoUnico();
+        await pool.query('INSERT INTO codigos (codigo, grupo_id) VALUES (?, ?)', [codigo, grupo_id]);
+        codigos.push(codigo);
+      }
+      res.json({ message: 'Códigos generados', codigos });
+    } catch (err) {
+      console.error('Error al generar códigos:', err);
+      res.status(500).json({ error: 'Error interno al generar códigos' });
+    }
+  });
 
 
 

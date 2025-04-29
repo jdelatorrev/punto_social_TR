@@ -1,3 +1,5 @@
+<!-- cliente-panel.html FINAL, corregido -->
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,295 +8,83 @@
   <title>Punto Social | Cupones</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    body { background: #f4f4f4;}
-    header {
-      color: white;
-      padding: 10px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    body { background: #f4f4f4; margin-left: 220px; font-family: 'Montserrat', sans-serif; }
+    header { color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
     header h1 { margin: 0; font-size: 22px; }
+
     #filtros { text-align: center; margin: 20px 0; }
-    #filtros button { margin: 0 5px; padding: 8px 16px; cursor: pointer; }
-    .cupon {
-      background: white;
-      border-left: 6px solid #999;
-      padding: 15px;
-      margin: 10px auto;
-      max-width: 600px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
+    #filtros button { margin: 0 5px; padding: 8px 16px; cursor: pointer; background: transparent; border: 2px solid black; border-radius: 8px; transition: all 0.3s ease; }
+    #filtros button:hover { background: black; color: white; }
+
+    .cupon { background: white; border-left: 6px solid #999; padding: 15px; margin: 10px auto; max-width: 600px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); border-radius: 8px; transition: transform 0.3s ease; }
+    .cupon:hover { transform: translateY(-5px); }
     .cupon.usado { border-color: #dc3545; }
     .cupon.no-usado { border-color: #28a745; }
     .estado { font-weight: bold; }
-    #cerrar {
-      display: block;
-      margin: 30px auto;
-      padding: 10px 20px;
-      background: #333;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
 
-    header button#cerrar {
-      margin-left: 20px;
-      background: #dc3545;
-      color: white;
-      padding: 8px 16px;
-      border: none;
-      border-radius: 5px;
-      font-size: 14px;
-      cursor: pointer;
-    }
+    .sidebar { position: fixed; top: 0; left: 0; width: 220px; height: 100%; background: #000; color: white; padding-top: 20px; font-family: 'Montserrat', sans-serif; box-shadow: 2px 0 5px rgba(0,0,0,0.3); z-index: 1000; transition: transform 0.3s ease; }
+    .sidebar ul { list-style: none; padding: 0; margin: 0; flex: 1; }
+    .sidebar ul li { padding: 12px 20px; cursor: pointer; transition: background 0.2s, transform 0.2s; font-size: 15px; }
+    .sidebar ul li:hover { background: #444; transform: translateX(5px); }
+    .sidebar h2 { text-align: center; margin-bottom: 20px; font-size: 18px; color: #e0e0e0; }
 
-    header button#cerrar:hover {
-      background: #c82333;
+    #menuToggle { display: none; position: fixed; top: 15px; left: 15px; z-index: 2000; background: #dc3545; color: white; border: none; padding: 10px 15px; font-size: 20px; cursor: pointer; border-radius: 5px; transition: all 0.3s ease; }
+    #menuToggle:hover { background: #c82333; }
+
+    #acciones { display: flex; flex-direction: column; align-items: center; margin-top: 30px; gap: 15px; }
+    button.comprar-btn, #cerrar, #canjearBtn { padding: 10px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; border: none; transition: all 0.3s ease; }
+    button.comprar-btn { background: #dc3545; color: white; }
+    button.comprar-btn:hover { background: #c82333; transform: scale(1.05); }
+    #cerrar { background: #000; color: white; }
+    #cerrar:hover { background: #333; transform: scale(1.05); }
+    #codigoInput { padding: 10px 15px; font-size: 16px; border: 2px solid black; border-radius: 8px; width: 250px; transition: border-color 0.3s; }
+    #codigoInput:focus { outline: none; border-color: red; }
+    #canjearBtn { background: white; color: black; border: 2px solid black; }
+    #canjearBtn:hover { background: black; color: white; transform: scale(1.05); }
+
+    @media (max-width: 768px) {
+      body { margin-left: 0; }
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.active { transform: translateX(0); }
+      #menuToggle { display: block; }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+  <button id="menuToggle">☰</button>
   <header class="header">
-    <div class="container-m head">
-        <a  href="/frontend/index.html"><img src="/frontend/img/logo.PNG"></a>
-    </div>
-    <h1>Mis Cupones</h1>
-    <span id="usuarioNombre"></span>
+    <h1>Mis Cupones</h1><span id="usuarioNombre"></span>
   </header>
-  <div style="text-align:center; margin-top: 20px;">
-    <button onclick="irAComprar()" style="padding: 10px 20px; font-size: 16px; background: red; color: white; border: none; border-radius: 5px; cursor: pointer;">
-      🛒 Comprar cupones
-    </button>
+
+  <div class="sidebar">
+    <h2>Mis Comercios</h2>
+    <ul id="listaGrupos"></ul>
   </div>
-  
-  <button id="cerrar" onclick="cerrarSesion()">Cerrar sesión</button>
+
+  <div id="acciones">
+    <button class="comprar-btn" onclick="irAComprar()">🛒 Comprar cupones</button>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+      <input type="text" id="codigoInput" placeholder="Ingresa tu código">
+      <button id="canjearBtn" onclick="canjearCodigo()">Canjear</button>
+    </div>
+    <button id="cerrar" onclick="cerrarSesion()">Cerrar sesión</button>
+  </div>
+
   <div id="filtros">
     <button onclick="filtrar('todos')">Todos</button>
     <button onclick="filtrar('no-usado')">Disponibles</button>
     <button onclick="filtrar('usado')">Usados</button>
-  
     <br><br>
     <label for="filtroComercio">Filtrar por comercio:</label>
-    <select id="filtroComercio" onchange="aplicarFiltros()" style="margin-right: 20px;"></select>
-  
+    <select id="filtroComercio" onchange="aplicarFiltros()"></select>
     <label for="buscadorCupon">Buscar:</label>
-    <input type="text" id="buscadorCupon" oninput="aplicarFiltros()" placeholder="Buscar cupón o comercio..." style="padding: 5px; width: 250px;">
+    <input type="text" id="buscadorCupon" oninput="aplicarFiltros()" placeholder="Buscar cupón o comercio...">
   </div>
-  
-  <div id="cupones-container" class="cuponescliente"></div>
+
+  <div id="cupones-container"></div>
+
   <script src="js/api.js"></script>
-  <script>
-
-    function irAComprar() {
-      window.location.href = "comprar.html";
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      // Verifica si hay compra reciente
-      if (localStorage.getItem("mostrarMensajeCompra") === "true") {
-        localStorage.removeItem("mostrarMensajeCompra");
-        Swal.fire({
-          title: "¡Gracias por tu compra!",
-          text: "Aquí están tus nuevos cupones 🎉",
-          icon: "success",
-          confirmButtonText: "Ver cupones"
-        });
-      }
-
-      const grupoPendiente = localStorage.getItem("grupoPendiente");
-
-      if (grupoPendiente) {
-        const continuar = confirm("Tienes una compra pendiente. ¿Deseas continuar?");
-        if (continuar) {
-          localStorage.removeItem("grupoPendiente");
-          window.location.href = `comprar.html?grupo=${grupoPendiente}`;
-        }
-      }
-
-      cargarCupones();
-    });
-    let cuponesGlobal = [];
-
-    function verificarTokenValido() {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        window.location.href = "ingresa.html";
-        return null;
-      }
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const ahora = Math.floor(Date.now() / 1000);
-        if (payload.exp < ahora) {
-          alert("Tu sesión ha expirado. Inicia sesión nuevamente.");
-          localStorage.removeItem("token");
-          window.location.href = "ingresa.html";
-          return null;
-        }
-        return payload;
-      } catch (err) {
-        alert("Token inválido.");
-        localStorage.removeItem("token");
-        window.location.href = "ingresa.html";
-        return null;
-      }
-    }
-
-    function cerrarSesion() {
-      localStorage.removeItem("token");
-      window.location.href = "ingresa.html";
-    }
-
-
-    let filtroEstado = "todos"; // mantiene el filtro seleccionado
-
-    function filtrar(filtro) {
-      filtroEstado = filtro;
-      aplicarFiltros();
-    }
-
-    function aplicarFiltros() {
-      const contenedor = document.getElementById("cupones-container");
-      contenedor.innerHTML = "";
-
-      const comercioSeleccionado = document.getElementById("filtroComercio").value.toLowerCase();
-      const textoBusqueda = document.getElementById("buscadorCupon").value.toLowerCase();
-
-      let filtrados = [...cuponesGlobal];
-
-      // Aplicar filtro de estado
-      if (filtroEstado === 'usado') {
-        filtrados = filtrados.filter(c => c.utilizado);
-      } else if (filtroEstado === 'no-usado') {
-        filtrados = filtrados.filter(c => !c.utilizado);
-      } else {
-        const disponibles = filtrados.filter(c => !c.utilizado);
-        const usados = filtrados.filter(c => c.utilizado);
-        filtrados = [...disponibles, ...usados];
-      }
-
-      // Aplicar filtro por comercio
-      if (comercioSeleccionado) {
-        filtrados = filtrados.filter(c => c.comercio.toLowerCase() === comercioSeleccionado);
-      }
-
-      // Aplicar búsqueda por texto
-      if (textoBusqueda) {
-        filtrados = filtrados.filter(c =>
-          c.comercio.toLowerCase().includes(textoBusqueda) ||
-          c.titulo.toLowerCase().includes(textoBusqueda)
-        );
-      }
-
-      if (filtrados.length === 0) {
-        contenedor.innerHTML = "<p>No tienes cupones que coincidan con los filtros.</p>";
-        return;
-      }
-
-      filtrados.forEach(c => {
-        const div = document.createElement("div");
-        div.className = "cupon " + (c.utilizado ? "usado" : "no-usado");
-        div.innerHTML = `
-          <h3>${c.titulo}</h3>
-          <p><strong>Comercio:</strong> ${c.comercio}</p>
-          <p><strong>Descripción:</strong> ${c.descripcion}</p>
-          <p><strong>Descuento:</strong> ${c.descuento}</p>
-          <p><strong>Válido hasta:</strong> ${new Date(c.fecha_expiracion).toLocaleDateString()}</p>
-          <p class="estado">${c.utilizado ? "❌ Ya fue usado" : "✅ Disponible"}</p>
-        `;
-        contenedor.appendChild(div);
-      });
-    }
-
-
-    async function eliminarCupon(cuponUsuarioId) {
-      const token = localStorage.getItem("token");
-
-      const confirmacion = await Swal.fire({
-        title: '¿Eliminar cupón?',
-        text: "Este cupón ya no se podrá recuperar.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-      });
-
-      if (!confirmacion.isConfirmed) return;
-
-      try {
-        const res = await fetch(`${API}/api/cupon-usuario/${cuponUsuarioId}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: "Bearer " + token
-          }
-        });
-
-        const text = await res.text();
-        console.log("Respuesta cruda:", text);
-
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (e) {
-          console.error("❌ Respuesta no es JSON válido:", e);
-          await Swal.fire('Error', 'Respuesta inesperada del servidor', 'error');
-          return;
-        }
-
-        if (res.ok) {
-          await Swal.fire('Eliminado', 'El cupón fue eliminado correctamente.', 'success');
-          cargarCupones();
-        } else {
-          await Swal.fire('Error', data.error || 'No se pudo eliminar el cupón.', 'error');
-        }
-
-      } catch (err) {
-        console.error("❌ Error al eliminar cupón:", err);
-        await Swal.fire('Error', 'Error de red al eliminar el cupón.', 'error');
-      }
-    }
-
-
-
-
-
-    // Inactividad de 3 minutos
-    let inactividadTimer;
-    function resetInactividad() {
-      clearTimeout(inactividadTimer);
-      inactividadTimer = setTimeout(() => {
-        alert("Sesión cerrada por inactividad.");
-        localStorage.removeItem("token");
-        window.location.href = "ingresa.html";
-      }, 180000);
-    }
-    ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(evt => document.addEventListener(evt, resetInactividad));
-    resetInactividad();
-
-    async function cargarCupones() {
-      const payload = verificarTokenValido();
-      if (!payload || payload.tipo !== "cliente") return;
-      document.getElementById("usuarioNombre").textContent = payload.nombre;
-
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API}/api/mis-cupones`, {
-        headers: { Authorization: "Bearer " + token }
-      });
-
-      const data = await res.json();
-      cuponesGlobal = data;
-
-      // 🔽 Llenar el select de comercios únicos
-      const comerciosUnicos = [...new Set(cuponesGlobal.map(c => c.comercio))];
-      const select = document.getElementById("filtroComercio");
-      select.innerHTML = `<option value="">-- Todos --</option>` + 
-        comerciosUnicos.map(nombre => `<option value="${nombre}">${nombre}</option>`).join('');
-
-      filtrar(filtroEstado);
-    }
-  </script>
+  <script src="js/cliente-panel.js"></script>
 </body>
 </html>

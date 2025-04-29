@@ -258,21 +258,6 @@
       window.location.href = "ingresa.html";
     }
 
-    // Inactividad de 3 minutos
-    let inactividadTimer;
-    function resetInactividad() {
-      clearTimeout(inactividadTimer);
-      inactividadTimer = setTimeout(() => {
-        alert("Sesión cerrada por inactividad.");
-        localStorage.removeItem("token");
-        window.location.href = "comercio-login.html";
-      }, 180000);
-    }
-    ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(evt => {
-      document.addEventListener(evt, resetInactividad);
-    });
-    resetInactividad();
-
     cargarCuponesVendidos();
   </script>
 </body>

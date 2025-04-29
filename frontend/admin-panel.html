@@ -560,6 +560,24 @@ button {
     </table>
   </section>
   <div id="contenedor-cupones-por-grupo" class="cuponesadmin" style="display:none;"></div>
+  <section id="generarCodigosSection" class="asignar-cupones-container" style="display: none;">
+    <h2>Generar Códigos Únicos</h2>
+  
+    <label>Seleccionar Grupo:
+      <select id="grupoSelectCodigos" required>
+        <option value="">-- Selecciona un grupo --</option>
+      </select>
+    </label>
+  
+    <label>Cantidad de Códigos:
+      <input type="number" id="cantidadCodigos" min="1" placeholder="Ej. 10" required>
+    </label>
+  
+    <button onclick="generarCodigos()">Generar Códigos</button>
+  
+    <div id="listaCodigosGenerados" style="margin-top: 20px;"></div>
+  </section>
+  
 
   <button id="cerrar" onclick="cerrarSesion()">Cerrar sesión</button>
 
@@ -1175,7 +1193,7 @@ async function habilitarCupon(id) {
           "Content-Type": "application/json",
           Authorization: "Bearer " + token
         },
-        body: JSON.stringify({ nombre, descripcion, precio, fecha_inicio, fecha_fin })
+        body: JSON.stringify({ nombre, descripcion, precio, fecha_fin })
       });
   
       const data = await res.json();
@@ -1723,17 +1741,19 @@ async function habilitarCupon(id) {
       'cupones': 5
     };
 
-    const index = secciones[seccion];
+      const index = secciones[seccion];
     if (typeof index !== 'undefined') {
       document.querySelectorAll('section')[index].style.display = 'block';
     }
 
-    // Mostrar el contenedor solo si está en la pestaña de cupones
     if (seccion === 'cupones') {
       document.getElementById('contenedor-cupones-por-grupo').style.display = 'block';
     }
 
-    // Cambia estilos del sidebar activo
+    if (seccion === 'asignar') {
+      document.getElementById('generarCodigosSection').style.display = 'block';  // 👈 solo mostrarlo en "Asignar Cupones"
+    }
+
     document.querySelectorAll('.sidebar ul li').forEach(li => li.classList.remove('active'));
     document.querySelector(`.sidebar ul li:nth-child(${index + 1})`).classList.add('active');
   }
@@ -1822,6 +1842,107 @@ async function habilitarCupon(id) {
         Swal.fire('Error', '⛔ Error de conexión.', 'error');
       }
     }
+
+    // Cargar grupos en el select al abrir el panel
+    function generarCodigos() {
+      const grupo_id = document.getElementById("grupoSelectCodigos").value;
+      const cantidad = document.getElementById("cantidadCodigos").value;
+
+      if (!grupo_id || !cantidad || cantidad <= 0) {
+        return Swal.fire('Error', 'Selecciona un grupo y una cantidad válida', 'warning');
+      }
+
+      fetch(`${API}/api/admin/codigos`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        },
+        body: JSON.stringify({ grupo_id, cantidad })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.message) {
+            Swal.fire('Éxito', `${cantidad} códigos generados`, 'success');
+            mostrarCodigosGenerados(data.codigos);
+          } else {
+            Swal.fire('Error', data.error || 'No se pudieron generar los códigos', 'error');
+          }
+        })
+        .catch(err => {
+          console.error('Error al generar códigos:', err);
+          Swal.fire('Error', 'Error de conexión', 'error');
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      mostrarSeccion('reporte');
+      cargarGruposParaCodigos();  // ✅ Asegúrate de que se llama
+    });
+    // Función para generar códigos
+
+    async function cargarGruposParaCodigos() {
+      try {
+        const res = await fetch(`${API}/api/admin/grupos`, {
+          headers: { Authorization: "Bearer " + token }
+        });
+
+        const grupos = await res.json();
+        const grupoSelectCodigos = document.getElementById("grupoSelectCodigos");
+        grupoSelectCodigos.innerHTML = `<option value="">-- Selecciona un grupo --</option>`;
+
+        grupos.forEach(g => {
+          const option = document.createElement("option");
+          option.value = g.id;
+          option.textContent = g.nombre;
+          grupoSelectCodigos.appendChild(option);
+        });
+      } catch (err) {
+        console.error("Error al cargar grupos para códigos:", err);
+        Swal.fire('Error', 'No se pudo cargar los grupos.', 'error');
+      }
+    }
+
+    function generarCodigos() {
+      const grupo_id = document.getElementById("grupoSelectCodigos").value;
+      const cantidad = document.getElementById("cantidadCodigos").value;
+
+      if (!grupo_id || !cantidad || cantidad <= 0) {
+        return Swal.fire('Error', 'Selecciona un grupo y una cantidad válida', 'warning');
+      }
+
+      fetch(`${API}/api/admin/codigos`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        },
+        body: JSON.stringify({ grupo_id, cantidad })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.message) {
+            Swal.fire('Éxito', `${cantidad} códigos generados`, 'success');
+            mostrarCodigosGenerados(data.codigos);
+          } else {
+            Swal.fire('Error', data.error || 'No se pudieron generar los códigos', 'error');
+          }
+        })
+        .catch(err => {
+          console.error('Error al generar códigos:', err);
+          Swal.fire('Error', 'Error de conexión', 'error');
+        });
+    }
+
+    // Mostrar la lista de códigos generados
+    function mostrarCodigosGenerados(codigos) {
+      const lista = document.getElementById("listaCodigosGenerados");
+      lista.innerHTML = "<h4>Códigos Generados:</h4><ul>" +
+        codigos.map(c => `<li>${c}</li>`).join('') +
+        "</ul>";
+    }
+
 
   </script>
   

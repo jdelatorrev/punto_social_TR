@@ -51,6 +51,41 @@ router.delete('/cupon-usuario/:id', verificarToken, async (req, res) => {
   }
 });
 
+router.post('/canjear-codigo', verificarToken, async (req, res) => {
+  const { codigo } = req.body;
+  const usuarioId = req.user.id;
+
+  try {
+    // Verificar si el código existe y no ha sido usado
+    const [rows] = await pool.query('SELECT * FROM codigos WHERE codigo = ? AND usado = 0', [codigo]);
+    if (rows.length === 0) {
+      return res.status(400).json({ error: 'Código inválido o ya usado' });
+    }
+
+    const codigoData = rows[0];
+    const grupoId = codigoData.grupo_id;
+
+    // Obtener cupones de ese grupo
+    const [cupones] = await pool.query('SELECT * FROM cupones WHERE grupo_id = ?', [grupoId]);
+
+    // Asignar cupones al usuario
+    for (let cupon of cupones) {
+      await pool.query(
+        'INSERT INTO cupones_usuarios (cupon_id, usuario_id, utilizado) VALUES (?, ?, 0)',
+        [cupon.id, usuarioId]
+      );
+    }
+
+    // Marcar el código como usado
+    await pool.query('UPDATE codigos SET usado = 1, usado_por = ? WHERE id = ?', [usuarioId, codigoData.id]);
+
+    res.json({ message: 'Cupones asignados correctamente', cupones: cupones.length });
+  } catch (err) {
+    console.error('Error al canjear código:', err);
+    res.status(500).json({ error: 'Error interno al canjear código' });
+  }
+});
+
 
 
 
