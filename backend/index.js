@@ -5,8 +5,6 @@ require('dotenv').config();
 const app = express();
 const pool = require('./db');
 
-console.log("🟢 Servidor iniciado y esperando peticiones...");
-
 // ✅ Lista blanca de orígenes permitidos
 const allowedOrigins = [
   'http://localhost:5500',                   // Frontend local
