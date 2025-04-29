@@ -1,4 +1,4 @@
-require('dotenv').config(); // 👈 DEBE SER LA PRIMERA LÍNEA
+require('dotenv').config();
 
 console.log('🛠️ ENV:', {
   host: process.env.DB_HOST,
@@ -18,16 +18,7 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
-  dateStrings: true  // 🔥 Esto forzará fechas como 'YYYY-MM-DD'
+  dateStrings: true
 });
 
 module.exports = pool;
-
-
-
-
-
-
-
-
-
