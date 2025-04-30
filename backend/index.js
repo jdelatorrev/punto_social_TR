@@ -112,7 +112,6 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
 (async () => {
   try {
     // Validación temprana de conexión con DB
