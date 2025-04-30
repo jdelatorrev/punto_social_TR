@@ -16,7 +16,7 @@ const allowedOrigins = [
   'https://miapp.netlify.app',
   'https://api.miapp.com',
   'https://puntosocialtr-production.up.railway.app',
-  'https://punto-social-frontend-e3ezhstf0-robertos-projects-5f1da2cb.vercel.app/'
+  'https://punto-social-frontend.vercel.app'
 ];
 
 // 🛡 Middleware de CORS
