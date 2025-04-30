@@ -5,6 +5,9 @@ const pool = require('../db');
 const paypal = require('@paypal/checkout-server-sdk');
 const verificarToken = require('../middleware/verificarToken');
 
+const BASE_URL = process.env.BACKEND_URL || "http://localhost:3000";
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://127.0.0.1:5500/frontend";
+
 // Crear orden de PayPal
 router.post('/crear-orden-paypal/:grupoId', verificarToken, async (req, res) => {
     const { grupoId } = req.params;
@@ -89,7 +92,7 @@ router.get('/paypal/capturar-orden', async (req, res) => {
         [insertCupones]
       );
 
-      return res.redirect(`http://127.0.0.1:5500/frontend/pago-exitoso.html?grupo=${encodeURIComponent(grupo.nombre)}`);
+      return res.redirect(`${FRONTEND_URL}/pago-exitoso.html?grupo=${encodeURIComponent(grupo.nombre)}`);
 
     }
 
