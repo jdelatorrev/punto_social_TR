@@ -27,8 +27,8 @@ router.post('/crear-orden-paypal/:grupoId', verificarToken, async (req, res) => 
           description: `Compra del grupo ${grupo.nombre}`
         }],
         application_context: {
-          return_url: 'http://localhost:3000/api/paypal/capturar-orden',
-          cancel_url: 'http://localhost:5500/frontend/pago-cancelado.html',
+          return_url: `${BASE_URL}/api/paypal/capturar-orden`,
+          cancel_url: `${BASE_URL}/pago-cancelado.html`,
           brand_name: 'Punto Social',
           landing_page: 'BILLING',     // 👈 Muestra directamente formulario de tarjeta
           user_action: 'PAY_NOW'       // 👈 Muestra botón "Pagar ahora"
