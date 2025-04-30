@@ -15,7 +15,8 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://miapp.netlify.app',
   'https://api.miapp.com',
-  'https://puntosocialtr-production.up.railway.app'
+  'https://puntosocialtr-production.up.railway.app',
+  'https://punto-social-frontend-e3ezhstf0-robertos-projects-5f1da2cb.vercel.app/'
 ];
 
 // 🛡 Middleware de CORS
