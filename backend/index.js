@@ -113,6 +113,22 @@ app.get('/api/test-db', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+(async () => {
+  try {
+    // Validación temprana de conexión con DB
+    const [result] = await pool.query('SELECT 1');
+    console.log("✅ Conexión con DB exitosa:", result);
+
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`✅ Servidor corriendo en puerto ${PORT}`);
+    });
+
+  } catch (err) {
+    console.error("❌ Error de conexión inicial con la DB:", err);
+    process.exit(1); // Detener si falla
+  }
+})();
 app.listen(PORT, () => {
   console.log(`✅ Servidor corriendo en puerto ${PORT}`);
 });
