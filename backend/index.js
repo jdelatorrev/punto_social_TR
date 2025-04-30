@@ -33,11 +33,11 @@ app.use(cors({
 app.use(express.json());
 
 // ✅ Servir archivos estáticos desde carpeta "frontend"
-app.use(express.static(path.join(__dirname, 'frontend')));
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 // ✅ Ruta raíz para servir index.html
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
 });
 
 // ✅ Ruta test de conexión a la base de datos
