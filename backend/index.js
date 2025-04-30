@@ -29,7 +29,29 @@ app.use(cors({
   credentials: true
 }));
 
-// Ruta pública para obtener vendedores activos
+// ✅ Middleware para JSON
+app.use(express.json());
+
+// ✅ Servir archivos estáticos desde carpeta "frontend"
+app.use(express.static(path.join(__dirname, 'frontend')));
+
+// ✅ Ruta raíz para servir index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+});
+
+// ✅ Ruta test de conexión a la base de datos
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT NOW() AS ahora');
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('❌ Error al conectar con DB:', err);
+    res.status(500).json({ error: 'Error en la conexión con la base de datos' });
+  }
+});
+
+// ✅ Ruta pública para obtener vendedores activos
 app.get("/api/vendedores-activos", async (req, res) => {
   try {
     const [rows] = await pool.query(`
@@ -44,7 +66,7 @@ app.get("/api/vendedores-activos", async (req, res) => {
   }
 });
 
-// Ruta pública para obtener grupos con comercios únicos y cupones anidados
+// ✅ Ruta pública para obtener grupos
 app.get("/api/grupos", async (req, res) => {
   try {
     const [grupos] = await pool.query(`
@@ -91,10 +113,7 @@ app.get("/api/grupos", async (req, res) => {
   }
 });
 
-// Middlewares
-app.use(express.json());
-
-// Rutas
+// ✅ Rutas organizadas
 app.use('/api', require('./routes/auth'));
 app.use('/api', require('./routes/cliente'));
 app.use('/api', require('./routes/comercio'));
@@ -102,23 +121,10 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api', require('./routes/public'));
 app.use('/api', require('./routes/pagos'));
 
-
-// Ruta de prueba de conexión a DB
-app.get('/api/test-db', async (req, res) => {
-  try {
-    const [rows] = await pool.query('SELECT NOW() AS ahora');
-    res.json(rows[0]);
-  } catch (err) {
-    console.error('❌ Error al conectar con DB:', err);
-    res.status(500).json({ error: 'Error en la conexión con la base de datos' });
-  }
-});
-
+// ✅ Iniciar servidor tras conexión exitosa
 const PORT = process.env.PORT || 3000;
-
 (async () => {
   try {
-    // Validación temprana de conexión con DB
     const [result] = await pool.query('SELECT 1');
     console.log("✅ Conexión con DB exitosa:", result);
 
@@ -128,8 +134,6 @@ const PORT = process.env.PORT || 3000;
 
   } catch (err) {
     console.error("❌ Error de conexión inicial con la DB:", err);
-    process.exit(1); // Detener si falla
+    process.exit(1);
   }
 })();
-
-
