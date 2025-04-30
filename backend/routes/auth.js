@@ -91,7 +91,7 @@ router.post('/olvide-password', async (req, res) => {
       UPDATE usuarios SET reset_token = ?, reset_expira = ? WHERE id = ?
     `, [token, expiracion, usuario.id]);
 
-    const link = `http://localhost:5500/frontend/reestablecer.html?token=${token}`;
+    const link = `https://punto-social-frontend.vercel.app/reestablecer.html?token=${token}`;
 
     await enviarCorreo(
       email,
@@ -99,7 +99,7 @@ router.post('/olvide-password', async (req, res) => {
       `
         <p>Hola ${usuario.nombre},</p>
         <p>Recibimos una solicitud para restablecer tu contraseña.</p>
-        <p><a href="${link}">Hacé clic acá para restablecerla</a></p>
+        <p><a href="${link}">Haz clic en el siguiente enlace para restablecerla</a></p>
         <p>Este enlace expirará en 15 minutos.</p>
       `
     );
