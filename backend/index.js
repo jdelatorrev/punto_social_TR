@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -9,11 +10,12 @@ console.log("🟢 Servidor iniciado y esperando peticiones...");
 
 // ✅ Lista blanca de orígenes permitidos
 const allowedOrigins = [
-  'http://localhost:5500',                   // Frontend local
-  'http://127.0.0.1:5500',                   // Otra forma del local
-  'http://localhost:3000',                   // Backend local
-  'https://miapp.netlify.app',               // Frontend en producción (Netlify)
-  'https://api.miapp.com'                    // Backend en producción (Render)
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+  'http://localhost:3000',
+  'https://miapp.netlify.app',
+  'https://api.miapp.com',
+  'https://puntosocialtr-production.up.railway.app'
 ];
 
 // 🛡 Middleware de CORS
