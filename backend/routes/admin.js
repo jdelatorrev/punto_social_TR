@@ -67,10 +67,13 @@ router.delete('/grupos/:id', verificarToken, soloAdmin, async (req, res) => {
     // Eliminar cupones del grupo
     await pool.query('DELETE FROM cupones WHERE grupo_id = ?', [id]);
 
-    // Eliminar ordenes relacionadas al grupo (esto es lo que faltaba!!)
+    // Eliminar ordenes del grupo
     await pool.query('DELETE FROM ordenes WHERE grupo_id = ?', [id]);
 
-    // Eliminar el grupo
+    // Eliminar códigos generados del grupo
+    await pool.query('DELETE FROM codigos WHERE grupo_id = ?', [id]);
+
+    // Finalmente eliminar el grupo
     const [resultado] = await pool.query('DELETE FROM grupos WHERE id = ?', [id]);
 
     if (resultado.affectedRows === 0) {
