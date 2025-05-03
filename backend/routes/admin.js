@@ -58,19 +58,23 @@ router.delete('/grupos/:id', verificarToken, soloAdmin, async (req, res) => {
   const { id } = req.params;
 
   try {
-    // Buscar cupones del grupo
-    const [cupones] = await pool.query("SELECT id FROM cupones WHERE grupo_id = ?", [id]);
+    // 1. Eliminar los cupones asociados al grupo (primero relaciones con cupones_usuarios)
+    const [cupones] = await pool.query('SELECT id FROM cupones WHERE grupo_id = ?', [id]);
 
-    // Eliminar cupones_usuarios de cada cupón
     for (let cupon of cupones) {
-      await pool.query("DELETE FROM cupones_usuarios WHERE cupon_id = ?", [cupon.id]);
+      // Eliminar de cupones_usuarios
+      await pool.query('DELETE FROM cupones_usuarios WHERE cupon_id = ?', [cupon.id]);
     }
 
-    // Eliminar los cupones del grupo
-    await pool.query("DELETE FROM cupones WHERE grupo_id = ?", [id]);
+    // 2. Eliminar cupones del grupo
+    await pool.query('DELETE FROM cupones WHERE grupo_id = ?', [id]);
 
-    // Eliminar el grupo
-    await pool.query("DELETE FROM grupos WHERE id = ?", [id]);
+    // 3. Eliminar el grupo
+    const [resultado] = await pool.query('DELETE FROM grupos WHERE id = ?', [id]);
+
+    if (resultado.affectedRows === 0) {
+      return res.status(404).json({ error: "Grupo no encontrado" });
+    }
 
     res.json({ message: "Grupo eliminado correctamente" });
   } catch (err) {
