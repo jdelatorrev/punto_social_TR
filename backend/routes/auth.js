@@ -4,8 +4,16 @@ const pool = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const { enviarCorreo } = require('../mailer'); // <- Agregado
+const rateLimit = require('express-rate-limit');
+const { enviarCorreo } = require('../mailer');
 require('dotenv').config();
+
+// 📌 Rate limiter para login (PRODUCCIÓN)
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 5,
+  message: "Demasiados intentos, intenta de nuevo más tarde"
+});
 
 // 🔐 Registro
 router.post('/register', async (req, res) => {
@@ -39,8 +47,8 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// 🔑 Login
-router.post('/login', async (req, res) => {
+// 🔑 Login (PRODUCCIÓN + COOKIES SEGURAS + RATE LIMIT)
+router.post('/login', loginLimiter, async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Datos incompletos' });
 
@@ -59,7 +67,14 @@ router.post('/login', async (req, res) => {
       tipo: usuario.tipo
     }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
-    res.json({ token });
+    // Enviar token en Cookie SEGURA + también en JSON para apps que lo usen directo (opcional)
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true, // Cambia a true en producción (en Railway + Vercel YA es producción, así que va true)
+      sameSite: 'strict'
+    });
+
+    res.json({ message: 'Login exitoso', token });
   } catch (err) {
     console.error('Error en login:', err);
     res.status(500).json({ error: 'Error interno al iniciar sesión' });
@@ -80,12 +95,9 @@ router.post('/olvide-password', async (req, res) => {
     const usuario = usuarios[0];
     const token = crypto.randomBytes(32).toString('hex');
 
-    // ✅ Fecha de expiración en formato MySQL DATETIME
     const ahora = new Date();
-    const expiracionDate = new Date(ahora.getTime() + 15 * 60 * 1000); // +15 minutos
+    const expiracionDate = new Date(ahora.getTime() + 15 * 60 * 1000);
     const expiracion = expiracionDate.toISOString().slice(0, 19).replace('T', ' ');
-
-    console.log('🧪 Guardando expiración:', expiracion);
 
     await pool.query(`
       UPDATE usuarios SET reset_token = ?, reset_expira = ? WHERE id = ?
@@ -110,7 +122,6 @@ router.post('/olvide-password', async (req, res) => {
     res.status(500).json({ error: 'Error interno al generar enlace de recuperación' });
   }
 });
-
 
 // 🔐 Restablecer contraseña
 router.post('/reestablecer-password/:token', async (req, res) => {
@@ -141,8 +152,5 @@ router.post('/reestablecer-password/:token', async (req, res) => {
     res.status(500).json({ error: 'Error interno al actualizar la contraseña' });
   }
 });
-
-
-
 
 module.exports = router;

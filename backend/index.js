@@ -2,11 +2,35 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 
 const app = express();
+app.use(express.json());
+app.use(cookieParser());
 const pool = require('./db');
 
 console.log("🟢 Servidor iniciado y esperando peticiones...");
+
+// 🔐 Helmet → Protege con cabeceras de seguridad
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    }
+  }
+}));
+
+// 🚨 Rate Limiting → Limita peticiones al login (máximo 5 cada 15 minutos)
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: "Demasiados intentos, intenta de nuevo más tarde."
+});
 
 // ✅ Lista blanca de orígenes permitidos
 const allowedOrigins = [
