@@ -83,19 +83,6 @@ router.delete('/grupos/:id', verificarToken, soloAdmin, async (req, res) => {
   }
 });
 
-router.delete('/grupos/:id', verificarToken, soloAdmin, async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    await pool.query('DELETE FROM cupones WHERE grupo_id = ?', [id]);
-    await pool.query('DELETE FROM grupos WHERE id = ?', [id]);
-    res.json({ message: "Grupo eliminado correctamente" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al eliminar grupo" });
-  }
-});
-
 // ---- CUPONES ----
 
 router.get('/cupones', verificarToken, soloAdmin, async (req, res) => {
