@@ -17,7 +17,7 @@ router.get('/cupones-vendidos', verificarToken, async (req, res) => {
         cupones.descripcion,
         cupones.descuento,
         cupones_usuarios.utilizado,
-        usuarios.nombre AS cliente
+        CONCAT(usuarios.nombre, ' ', usuarios.apellido_paterno, ' ', usuarios.apellido_materno) AS cliente
       FROM cupones_usuarios
       JOIN cupones ON cupones_usuarios.cupon_id = cupones.id
       JOIN usuarios ON cupones_usuarios.usuario_id = usuarios.id

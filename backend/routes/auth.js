@@ -17,7 +17,7 @@ const loginLimiter = rateLimit({
 
 // 🔐 Registro
 router.post('/register', async (req, res) => {
-  const { nombre, email, password, tipo } = req.body;
+  const { nombre, apellido_paterno, apellido_materno, email, password, tipo } = req.body;
 
   if (!nombre || !email || !password || !tipo) {
     return res.status(400).json({ error: 'Todos los campos son obligatorios' });
@@ -36,8 +36,8 @@ router.post('/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     await pool.query(
-      'INSERT INTO usuarios (nombre, email, password, tipo, telefono, vendedor_id) VALUES (?, ?, ?, ?, ?, ?)',
-      [nombre, email, hashedPassword, tipo, req.body.telefono, req.body.vendedor_id]
+      'INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, email, password, tipo, telefono, vendedor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [nombre, apellido_paterno, apellido_materno, email, hashedPassword, tipo, req.body.telefono, req.body.vendedor_id]
     );
 
     res.status(201).json({ message: 'Usuario registrado con éxito' });
@@ -64,6 +64,7 @@ router.post('/login', loginLimiter, async (req, res) => {
       id: usuario.id,
       email: usuario.email,
       nombre: usuario.nombre,
+      apellido_paterno: usuario.apellido_paterno, // Agregado para mostrar en panel cliente
       tipo: usuario.tipo
     }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
