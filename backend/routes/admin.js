@@ -299,4 +299,14 @@ router.post('/codigos', verificarToken, soloAdmin, async (req, res) => {
   }
 });
 
+router.get('/comercios', verificarToken, soloAdmin, async (req, res) => {
+  try {
+    const [comercios] = await pool.query('SELECT id, nombre FROM usuarios WHERE tipo = "comercio"');
+    res.json(comercios);
+  } catch (err) {
+    console.error("Error al obtener comercios:", err);
+    res.status(500).json({ error: "Error interno al obtener comercios" });
+  }
+});
+
 module.exports = router;
