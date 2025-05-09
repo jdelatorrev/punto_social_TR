@@ -244,6 +244,23 @@ router.get('/vendedores/:id/clientes', verificarToken, soloAdmin, async (req, re
   }
 });
 
+router.delete('/vendedores/:id', verificarToken, soloAdmin, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Reasignar clientes a NULL (o a un vendedor ficticio si prefieres)
+    await pool.query('UPDATE usuarios SET vendedor_id = NULL WHERE vendedor_id = ?', [id]);
+
+    // Eliminar el vendedor
+    await pool.query('DELETE FROM vendedores WHERE id = ?', [id]);
+
+    res.json({ message: "Vendedor eliminado y clientes actualizados" });
+  } catch (err) {
+    console.error("Error al eliminar vendedor:", err);
+    res.status(500).json({ error: "Error al eliminar vendedor" });
+  }
+});
+
 // ---- CLIENTES ----
 
 router.put('/clientes/:id/vendedor', verificarToken, soloAdmin, async (req, res) => {
